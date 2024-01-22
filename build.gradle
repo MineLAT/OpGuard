@@ -48,8 +48,9 @@ jar {
 
 shadowJar {
     archiveClassifier.set('')
-    relocate 'at.favre', project.group + '.shaded.at.favre'
-    relocate 'com.github', project.group + '.shaded.com.github'
-    relocate 'org.bstats', project.group + '.shaded.org.bstats'
+    relocate 'at.favre.lib.crypto.bcrypt', project.group + '.libs.bcrypt'
+    relocate 'at.favre.lib.bytes', project.group + '.libs.bytes'
+    relocate 'com.github.zafarkhaja.semver', project.group + '.libs.semver'
+    relocate 'org.bstats', project.group + '.libs.bstats'
     minimize()
 }
