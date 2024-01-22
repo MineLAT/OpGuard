@@ -1,6 +1,6 @@
 main: com.github.guardedoperators.opguard.OpGuardPlugin
 name: OpGuard
-version: ${project.version}
+version: ${version}
 api-version: 1.13
 
 description: Password-protected op.
