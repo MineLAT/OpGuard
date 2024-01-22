@@ -15,7 +15,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
-@NonNullPackage
+@NonNls
 package com.github.guardedoperators.opguard.config;
 
-import pl.tlinkowski.annotation.basic.NonNullPackage;
+import org.jetbrains.annotations.NonNls;

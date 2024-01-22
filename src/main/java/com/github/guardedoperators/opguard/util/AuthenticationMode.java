@@ -18,7 +18,7 @@
 package com.github.guardedoperators.opguard.util;
 
 import org.bukkit.Server;
-import pl.tlinkowski.annotation.basic.NullOr;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -129,9 +129,9 @@ public enum AuthenticationMode
     public static class Detected
     {
         private final AuthenticationMode mode;
-        private final @NullOr ProxyType proxy;
+        private final @Nullable ProxyType proxy;
         
-        public Detected(AuthenticationMode mode, @NullOr ProxyType proxy)
+        public Detected(AuthenticationMode mode, @Nullable ProxyType proxy)
         {
             if (mode == PROXY && proxy == null)
             {

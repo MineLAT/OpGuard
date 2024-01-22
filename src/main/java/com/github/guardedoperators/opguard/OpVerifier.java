@@ -26,7 +26,7 @@ import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
-import pl.tlinkowski.annotation.basic.NullOr;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -49,7 +49,7 @@ public final class OpVerifier
     private final OpData storage;
     
     private Password password = Password.NO_PASSWORD;
-    private @NullOr Instant lastOpListSizeWarning = null;
+    private @Nullable Instant lastOpListSizeWarning = null;
     
     OpVerifier(OpGuard opguard)
     {
@@ -57,7 +57,7 @@ public final class OpVerifier
         this.storage = new OpData();
         
         FileConfiguration data = storage.yaml();
-        @NullOr String hash = data.getString("hash");
+        @Nullable String hash = data.getString("hash");
         
         if (hash != null)
         {
@@ -98,7 +98,7 @@ public final class OpVerifier
         {
             if (!isVerified(operator.getUniqueId()))
             {
-                @NullOr String name = operator.getName();
+                @Nullable String name = operator.getName();
                 operator.setOp(false);
                 Context context = new Context(opguard).pluginAttempt().setOp().warning(
                     "An unknown plugin attempted to op <!>" + name + "&f. A recently-installed plugin may be to blame"

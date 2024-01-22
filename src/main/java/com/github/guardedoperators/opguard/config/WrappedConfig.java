@@ -21,7 +21,7 @@ import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
-import pl.tlinkowski.annotation.basic.NullOr;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -34,7 +34,7 @@ public abstract class WrappedConfig
     private final Path path;
     private final FileConfiguration config;
     
-    private @NullOr Consumer<? super Optional<Exception>> reloadHandler;
+    private @Nullable Consumer<? super Optional<Exception>> reloadHandler;
     
     public WrappedConfig(Plugin plugin, String filename)
     {
@@ -57,7 +57,7 @@ public abstract class WrappedConfig
     
     public void reload()
     {
-        @NullOr Exception exception = null;
+        @Nullable Exception exception = null;
         
         try
         {

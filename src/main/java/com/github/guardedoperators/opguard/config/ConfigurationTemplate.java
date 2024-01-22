@@ -19,7 +19,7 @@ package com.github.guardedoperators.opguard.config;
 
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import pl.tlinkowski.annotation.basic.NullOr;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -51,7 +51,7 @@ class ConfigurationTemplate
         {
             for (;;)
             {
-                @NullOr String line = reader.readLine();
+                @Nullable String line = reader.readLine();
                 if (line == null) { break; }
                 template.add(line);
             }
@@ -106,7 +106,7 @@ class ConfigurationTemplate
             }
             else
             {
-                @NullOr String value = config.getString(key);
+                @Nullable String value = config.getString(key);
                 if (value != null) { return List.of(sanitize(value)); }
             }
         }

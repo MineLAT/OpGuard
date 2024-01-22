@@ -18,7 +18,7 @@
 package com.github.guardedoperators.opguard.util;
 
 import com.github.zafarkhaja.semver.Version;
-import pl.tlinkowski.annotation.basic.NullOr;
+import org.jetbrains.annotations.Nullable;
 
 public class Versions
 {
@@ -26,7 +26,7 @@ public class Versions
     
     public static final Version ZERO = Version.forIntegers(0);
     
-    public static Version parseOrZero(@NullOr String versionString)
+    public static Version parseOrZero(@Nullable String versionString)
     {
         if (versionString == null) { return ZERO; }
         try { return Version.valueOf(versionString); }

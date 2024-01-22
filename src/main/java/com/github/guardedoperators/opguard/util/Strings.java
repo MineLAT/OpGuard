@@ -17,11 +17,11 @@
  */
 package com.github.guardedoperators.opguard.util;
 
-import pl.tlinkowski.annotation.basic.NullOr;
+import org.jetbrains.annotations.Nullable;
 
 public class Strings
 {
     private Strings() { throw new UnsupportedOperationException(); }
     
-    public static boolean isNullOrEmpty(@NullOr String text) { return text == null || text.isEmpty(); }
+    public static boolean isNullOrEmpty(@Nullable String text) { return text == null || text.isEmpty(); }
 }

@@ -17,7 +17,7 @@
  */
 package com.github.guardedoperators.opguard.util;
 
-import pl.tlinkowski.annotation.basic.NullOr;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Locale;
@@ -32,14 +32,14 @@ public class Placeholders
     
     protected final Map<String, Supplier<?>> placeholders = new HashMap<>();
     
-    public String get(@NullOr String placeholder)
+    public String get(@Nullable String placeholder)
     {
         if (Strings.isNullOrEmpty(placeholder)) { return ""; }
         
         Supplier<?> supplier = placeholders.get(placeholder.toLowerCase(Locale.ROOT));
         if (supplier == null) { return ""; }
         
-        @NullOr Object result = null;
+        @Nullable Object result = null;
         try { result = supplier.get(); }
         catch (Exception e) { e.printStackTrace(); }
         

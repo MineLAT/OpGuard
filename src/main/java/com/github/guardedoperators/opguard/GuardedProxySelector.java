@@ -19,7 +19,7 @@ package com.github.guardedoperators.opguard;
 
 import com.github.guardedoperators.opguard.util.Connections;
 import com.github.guardedoperators.opguard.util.Debug;
-import pl.tlinkowski.annotation.basic.NullOr;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.net.Proxy;
@@ -33,14 +33,14 @@ public final class GuardedProxySelector extends ProxySelector
 {
     static void setup(OpGuard opguard)
     {
-        @NullOr ProxySelector prior = ProxySelector.getDefault();
+        @Nullable ProxySelector prior = ProxySelector.getDefault();
         ProxySelector.setDefault(new GuardedProxySelector(opguard, prior));
     }
     
     private final OpGuard opguard;
-    private final @NullOr ProxySelector prior;
+    private final @Nullable ProxySelector prior;
     
-    public GuardedProxySelector(OpGuard opguard, @NullOr ProxySelector prior)
+    public GuardedProxySelector(OpGuard opguard, @Nullable ProxySelector prior)
     {
         this.opguard = Objects.requireNonNull(opguard, "opguard");
         this.prior = prior;

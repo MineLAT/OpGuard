@@ -23,7 +23,7 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
-import pl.tlinkowski.annotation.basic.NullOr;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -137,7 +137,7 @@ final class OpGuardCommand
             }
         }
         
-        @NullOr OfflinePlayer player = getPlayer(name, onlineOnly);
+        @Nullable OfflinePlayer player = getPlayer(name, onlineOnly);
         
         if (player == null)
         {
@@ -194,7 +194,7 @@ final class OpGuardCommand
     }
     
     @SuppressWarnings("deprecation")
-    private @NullOr OfflinePlayer getPlayer(String name, boolean online)
+    private @Nullable OfflinePlayer getPlayer(String name, boolean online)
     {
         return (online) ? Bukkit.getPlayer(name) : Bukkit.getOfflinePlayer(name);
     }

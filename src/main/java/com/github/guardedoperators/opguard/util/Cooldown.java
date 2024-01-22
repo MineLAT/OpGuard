@@ -17,7 +17,7 @@
  */
 package com.github.guardedoperators.opguard.util;
 
-import pl.tlinkowski.annotation.basic.NullOr;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -40,7 +40,7 @@ public class Cooldown
         return duration;
     }
     
-    public boolean since(@NullOr Instant past)
+    public boolean since(@Nullable Instant past)
     {
         if (past == null) { return true; }
         return Duration.between(Instant.now(), past).compareTo(duration) >= 0;

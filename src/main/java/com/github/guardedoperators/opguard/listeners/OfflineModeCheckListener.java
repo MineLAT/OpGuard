@@ -24,7 +24,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import pl.tlinkowski.annotation.basic.NullOr;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -34,7 +34,7 @@ import java.util.logging.Logger;
 
 public class OfflineModeCheckListener implements Listener
 {
-    private @NullOr Instant warning = null;
+    private @Nullable Instant warning = null;
     
     private final OpGuard opguard;
     private AuthenticationMode mode;

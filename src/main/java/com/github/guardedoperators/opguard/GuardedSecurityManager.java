@@ -18,7 +18,7 @@
 package com.github.guardedoperators.opguard;
 
 import com.github.guardedoperators.opguard.util.Debug;
-import pl.tlinkowski.annotation.basic.NullOr;
+import org.jetbrains.annotations.Nullable;
 
 import java.security.Permission;
 import java.util.Objects;
@@ -27,15 +27,15 @@ final class GuardedSecurityManager extends SecurityManager
 {
     static void setup(OpGuard opguard)
     {
-        @NullOr SecurityManager existing = System.getSecurityManager();
+        @Nullable SecurityManager existing = System.getSecurityManager();
         GuardedSecurityManager manager = new GuardedSecurityManager(opguard, existing);
         System.setSecurityManager(manager);
     }
     
     private final OpGuard opguard;
-    private final @NullOr SecurityManager prior;
+    private final @Nullable SecurityManager prior;
     
-    private GuardedSecurityManager(OpGuard opguard, @NullOr SecurityManager prior)
+    private GuardedSecurityManager(OpGuard opguard, @Nullable SecurityManager prior)
     {
         this.opguard = Objects.requireNonNull(opguard, "opguard");
         this.prior = prior;

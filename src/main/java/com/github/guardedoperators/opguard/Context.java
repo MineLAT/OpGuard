@@ -20,7 +20,7 @@ package com.github.guardedoperators.opguard;
 import com.github.guardedoperators.opguard.config.OpGuardConfig;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
-import pl.tlinkowski.annotation.basic.NullOr;
+import org.jetbrains.annotations.Nullable;
 
 public final class Context
 {
@@ -45,8 +45,8 @@ public final class Context
         SECURITY
     }
     
-    private @NullOr Cause cause = null;
-    private @NullOr Source source = null;
+    private @Nullable Cause cause = null;
+    private @Nullable Source source = null;
     private Status status = Status.OKAY;
     private String message = "";
     private boolean punishmentActionTaken = false;
