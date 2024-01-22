@@ -23,42 +23,40 @@ import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Connections
-{
-    private Connections() { throw new UnsupportedOperationException(); }
-    
+public class Connections {
+    private Connections() {
+        throw new UnsupportedOperationException();
+    }
+
     private static final Pattern TOP_LEVEL_DOMAIN_PATTERN = Pattern.compile("(?<domain>[\\w-]+\\.\\w+)\\.*$");
-    
-    private static String topLevelDomain(String domain)
-    {
+
+    private static String topLevelDomain(String domain) {
         Matcher matcher = TOP_LEVEL_DOMAIN_PATTERN.matcher(domain);
         return (matcher.find()) ? matcher.group("domain") : domain;
     }
-    
-    private static boolean isAnyDomainHashBlocked(String ... hashedDomains)
-    {
-        String[] blocked = new String[] { // :^)
-            "a3fac1661e70bafef3286dfb1e952d9540e5db4013210270b4adacb255489ec3",
-            "b4e5ea175906c5b037cdb760c8a1652db3fae5a61fe4136e77cccbb0559d62f1"
+
+    private static boolean isAnyDomainHashBlocked(String... hashedDomains) {
+        String[] blocked = new String[]{ // :^)
+                "a3fac1661e70bafef3286dfb1e952d9540e5db4013210270b4adacb255489ec3",
+                "b4e5ea175906c5b037cdb760c8a1652db3fae5a61fe4136e77cccbb0559d62f1"
         };
-        
-        for (String hash : blocked)
-        {
-            for (String hashedDomain : hashedDomains)
-            {
-                if (hash.equals(hashedDomain)) { return true; }
+
+        for (String hash : blocked) {
+            for (String hashedDomain : hashedDomains) {
+                if (hash.equals(hashedDomain)) {
+                    return true;
+                }
             }
         }
-        
+
         return false;
     }
-    
-    public static boolean isBlockedDomain(String domain)
-    {
+
+    public static boolean isBlockedDomain(String domain) {
         String lowerCaseDomain = domain.toLowerCase(Locale.ROOT);
         return isAnyDomainHashBlocked(
-            Password.Algorithm.SHA_256.passwordFromPlainText(lowerCaseDomain).hash(),
-            Password.Algorithm.SHA_256.passwordFromPlainText(topLevelDomain(lowerCaseDomain)).hash()
+                Password.Algorithm.SHA_256.passwordFromPlainText(lowerCaseDomain).hash(),
+                Password.Algorithm.SHA_256.passwordFromPlainText(topLevelDomain(lowerCaseDomain)).hash()
         );
     }
 }

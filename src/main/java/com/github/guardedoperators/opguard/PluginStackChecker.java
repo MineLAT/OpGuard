@@ -26,156 +26,126 @@ import java.util.Objects;
 import java.util.Stack;
 
 @Deprecated(forRemoval = true)
-public final class PluginStackChecker
-{
+public final class PluginStackChecker {
     private final StackTraceElement[] stackTrace;
-    
+
     private final Stack<Plugin> allowed = new Stack<>();
-    
+
     private Plugin plugin = null;
     private StackTraceElement element = null;
-    
-    public PluginStackChecker(OpGuard opguard)
-    {
+
+    public PluginStackChecker(OpGuard opguard) {
         Objects.requireNonNull(opguard, "opguard");
         this.stackTrace = Thread.currentThread().getStackTrace();
-        
-        for (StackTraceElement element : stackTrace)
-        {
-            try
-            {
+
+        for (StackTraceElement element : stackTrace) {
+            try {
                 Plugin plugin = getPluginByClass(Class.forName(element.getClassName()));
-                
-                if (plugin != null && plugin != opguard.plugin())
-                {
+
+                if (plugin != null && plugin != opguard.plugin()) {
                     OpGuardConfig config = opguard.config();
-                    
-                    if (config.shouldExemptPlugins() && config.getExemptPlugins().contains(plugin.getName()))
-                    {
+
+                    if (config.shouldExemptPlugins() && config.getExemptPlugins().contains(plugin.getName())) {
                         allowed.push(plugin);
-                    }
-                    else
-                    {
+                    } else {
                         this.plugin = plugin;
                         this.element = element;
                         break;
                     }
                 }
-            }
-            catch (ClassNotFoundException e) { } // Don't do anything: just keep going.
+            } catch (ClassNotFoundException e) {
+            } // Don't do anything: just keep going.
         }
     }
-    
-    private Plugin getPluginByClass(Class<?> clazz)
-    {
+
+    private Plugin getPluginByClass(Class<?> clazz) {
         ClassLoader loader = clazz.getClassLoader();
-        
-        synchronized (Bukkit.getPluginManager())
-        {
-            for (Plugin plugin : Bukkit.getPluginManager().getPlugins())
-            {
-                if (plugin.getClass().getClassLoader() == loader)
-                {
+
+        synchronized (Bukkit.getPluginManager()) {
+            for (Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
+                if (plugin.getClass().getClassLoader() == loader) {
                     return plugin;
                 }
             }
         }
         return null;
     }
-    
-    public boolean hasFoundPlugin()
-    {
+
+    public boolean hasFoundPlugin() {
         return plugin != null;
     }
-    
-    public Plugin getPlugin()
-    {
+
+    public Plugin getPlugin() {
         return plugin;
     }
-    
-    public StackTraceElement[] getStackTrace()
-    {
+
+    public StackTraceElement[] getStackTrace() {
         return stackTrace;
     }
-    
-    public StackTraceElement getPluginStackElement()
-    {
+
+    public StackTraceElement getPluginStackElement() {
         return element;
     }
-    
-    public boolean hasAllowedPlugins()
-    {
+
+    public boolean hasAllowedPlugins() {
         return !allowed.empty();
     }
-    
-    public Stack<Plugin> getAllowedPlugins()
-    {
+
+    public Stack<Plugin> getAllowedPlugins() {
         return allowed;
     }
-    
-    public Plugin getTopAllowedPlugin()
-    {
+
+    public Plugin getTopAllowedPlugin() {
         return allowed.peek();
     }
-    
-    public File getPluginJar()
-    {
+
+    public File getPluginJar() {
         Class clazz = plugin.getClass();
         return new File(clazz.getProtectionDomain().getCodeSource().getLocation().getFile());
     }
-    
-    private boolean renameJarFile()
-    {
+
+    private boolean renameJarFile() {
         File current = getPluginJar();
         String path = current.toString() + ".opguard-disabled";
         File replace = new File(path);
         int iteration = 0;
-        
-        while (replace.exists())
-        {
+
+        while (replace.exists()) {
             replace = new File(path + iteration++);
         }
         return current.renameTo(replace);
     }
-    
-    public void disablePlugin(OpGuard api, Context context)
-    {
-        if (!hasFoundPlugin())
-        {
+
+    public void disablePlugin(OpGuard api, Context context) {
+        if (!hasFoundPlugin()) {
             throw new IllegalStateException("No plugin to disable.");
         }
-        
+
         OpGuardConfig config = api.config();
         String name = plugin.getName();
-        
-        if (config.getExemptPlugins().contains(name))
-        {
+
+        if (config.getExemptPlugins().contains(name)) {
             Context exemption = context.copy();
-            
+
             exemption.warning
-            (
-            "The plugin &7" + name + "&f is defined in the exempt-plugins list, " +
-            "but plugin exemptions are currently disabled"
-            );
+                    (
+                            "The plugin &7" + name + "&f is defined in the exempt-plugins list, " +
+                                    "but plugin exemptions are currently disabled"
+                    );
             api.warn(exemption).log(exemption);
         }
-        
+
         String jar = getPluginJar().getName();
-        
-        if (config.canDisableOtherPlugins())
-        {
+
+        if (config.canDisableOtherPlugins()) {
             Bukkit.getPluginManager().disablePlugin(plugin);
             context.okay("Disabled plugin &7" + name + "&f. Remove it from the server immediately");
             api.warn(context).log(context);
-            
-            if (config.canRenameOtherPlugins())
-            {
-                if (renameJarFile())
-                {
+
+            if (config.canRenameOtherPlugins()) {
+                if (renameJarFile()) {
                     context.okay("Renamed plugin jar &7" + jar + "&f to prevent re-enabling");
-                }
-                else
-                {
+                } else {
                     context.warning("Unable to rename plugin jar &7" + jar);
                 }
                 api.warn(context).log(context);

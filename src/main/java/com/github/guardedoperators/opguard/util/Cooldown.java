@@ -22,27 +22,27 @@ import org.jetbrains.annotations.Nullable;
 import java.time.Duration;
 import java.time.Instant;
 
-public class Cooldown
-{
+public class Cooldown {
     private static final Cooldown COOLDOWN_30_MINUTES = new Cooldown(Duration.ofMinutes(30));
-    
-    public static Cooldown of30Minutes() { return COOLDOWN_30_MINUTES; }
-    
+
+    public static Cooldown of30Minutes() {
+        return COOLDOWN_30_MINUTES;
+    }
+
     private final Duration duration;
-    
-    public Cooldown(Duration duration)
-    {
+
+    public Cooldown(Duration duration) {
         this.duration = duration;
     }
-    
-    public Duration duration()
-    {
+
+    public Duration duration() {
         return duration;
     }
-    
-    public boolean since(@Nullable Instant past)
-    {
-        if (past == null) { return true; }
+
+    public boolean since(@Nullable Instant past) {
+        if (past == null) {
+            return true;
+        }
         return Duration.between(Instant.now(), past).compareTo(duration) >= 0;
     }
 }

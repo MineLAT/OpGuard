@@ -19,20 +19,24 @@ package com.github.guardedoperators.opguard;
 
 import org.bukkit.plugin.Plugin;
 
-public final class PluginOnStack
-{
+public final class PluginOnStack {
     private final Plugin plugin;
     private final boolean isExempt;
-    
-    PluginOnStack(Plugin plugin, boolean isExempt)
-    {
+
+    PluginOnStack(Plugin plugin, boolean isExempt) {
         this.plugin = plugin;
         this.isExempt = isExempt;
     }
-    
-    public Plugin plugin() { return plugin; }
-    
-    public String name() { return plugin.getName(); }
-    
-    public boolean isExempt() { return isExempt; }
+
+    public Plugin plugin() {
+        return plugin;
+    }
+
+    public String name() {
+        return plugin.getName();
+    }
+
+    public boolean isExempt() {
+        return isExempt;
+    }
 }

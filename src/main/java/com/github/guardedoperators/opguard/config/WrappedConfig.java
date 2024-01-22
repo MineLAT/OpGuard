@@ -28,47 +28,48 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public abstract class WrappedConfig
-{
+public abstract class WrappedConfig {
     private final Plugin plugin;
     private final Path path;
     private final FileConfiguration config;
-    
+
     private @Nullable Consumer<? super Optional<Exception>> reloadHandler;
-    
-    public WrappedConfig(Plugin plugin, String filename)
-    {
+
+    public WrappedConfig(Plugin plugin, String filename) {
         this.plugin = plugin;
         this.path = plugin.getDataFolder().toPath().resolve(filename);
         this.config = YamlConfiguration.loadConfiguration(path.toFile());
     }
-    
-    protected void reloadsWith(Consumer<? super Optional<Exception>> reloadHandler)
-    {
+
+    protected void reloadsWith(Consumer<? super Optional<Exception>> reloadHandler) {
         this.reloadHandler = reloadHandler;
         reloadHandler.accept(Optional.empty());
     }
-    
-    public Plugin plugin() { return plugin; }
-    
-    public Path path() { return path; }
-    
-    public FileConfiguration yaml() { return config; }
-    
-    public void reload()
-    {
+
+    public Plugin plugin() {
+        return plugin;
+    }
+
+    public Path path() {
+        return path;
+    }
+
+    public FileConfiguration yaml() {
+        return config;
+    }
+
+    public void reload() {
         @Nullable Exception exception = null;
-        
-        try
-        {
+
+        try {
             config.load(path.toFile());
-        }
-        catch (IOException | InvalidConfigurationException e)
-        {
+        } catch (IOException | InvalidConfigurationException e) {
             exception = e;
             e.printStackTrace();
         }
-        
-        if (reloadHandler != null) { reloadHandler.accept(Optional.ofNullable(exception)); }
+
+        if (reloadHandler != null) {
+            reloadHandler.accept(Optional.ofNullable(exception));
+        }
     }
 }

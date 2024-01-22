@@ -23,24 +23,28 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.nio.file.Path;
 import java.util.Optional;
 
-public class Plugins
-{
-    private Plugins() { throw new UnsupportedOperationException(); }
-    
-    public static Optional<Plugin> pluginOfClass(Class<?> clazz)
-    {
-        try { return Optional.of(JavaPlugin.getProvidingPlugin(clazz)); }
-        catch (Exception ignored) { return Optional.empty(); }
+public class Plugins {
+    private Plugins() {
+        throw new UnsupportedOperationException();
     }
-    
-    public static Optional<Plugin> pluginOfClassByName(String fullyQualifiedClassName)
-    {
-        try { return pluginOfClass(Class.forName(fullyQualifiedClassName)); }
-        catch (ClassNotFoundException ignored) { return Optional.empty(); }
+
+    public static Optional<Plugin> pluginOfClass(Class<?> clazz) {
+        try {
+            return Optional.of(JavaPlugin.getProvidingPlugin(clazz));
+        } catch (Exception ignored) {
+            return Optional.empty();
+        }
     }
-    
-    public static Path jarFilePath(Plugin plugin)
-    {
+
+    public static Optional<Plugin> pluginOfClassByName(String fullyQualifiedClassName) {
+        try {
+            return pluginOfClass(Class.forName(fullyQualifiedClassName));
+        } catch (ClassNotFoundException ignored) {
+            return Optional.empty();
+        }
+    }
+
+    public static Path jarFilePath(Plugin plugin) {
         Class<?> clazz = plugin.getClass();
         return Path.of(clazz.getProtectionDomain().getCodeSource().getLocation().getFile());
     }

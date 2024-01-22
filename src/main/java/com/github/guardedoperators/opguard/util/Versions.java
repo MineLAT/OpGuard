@@ -20,16 +20,21 @@ package com.github.guardedoperators.opguard.util;
 import com.github.zafarkhaja.semver.Version;
 import org.jetbrains.annotations.Nullable;
 
-public class Versions
-{
-    private Versions() { throw new UnsupportedOperationException(); }
-    
+public class Versions {
+    private Versions() {
+        throw new UnsupportedOperationException();
+    }
+
     public static final Version ZERO = Version.forIntegers(0);
-    
-    public static Version parseOrZero(@Nullable String versionString)
-    {
-        if (versionString == null) { return ZERO; }
-        try { return Version.valueOf(versionString); }
-        catch (RuntimeException e) { return ZERO; }
+
+    public static Version parseOrZero(@Nullable String versionString) {
+        if (versionString == null) {
+            return ZERO;
+        }
+        try {
+            return Version.valueOf(versionString);
+        } catch (RuntimeException e) {
+            return ZERO;
+        }
     }
 }

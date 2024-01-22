@@ -29,39 +29,35 @@ import java.net.URI;
 import java.util.List;
 import java.util.Objects;
 
-public final class GuardedProxySelector extends ProxySelector
-{
-    static void setup(OpGuard opguard)
-    {
+public final class GuardedProxySelector extends ProxySelector {
+    static void setup(OpGuard opguard) {
         @Nullable ProxySelector prior = ProxySelector.getDefault();
         ProxySelector.setDefault(new GuardedProxySelector(opguard, prior));
     }
-    
+
     private final OpGuard opguard;
     private final @Nullable ProxySelector prior;
-    
-    public GuardedProxySelector(OpGuard opguard, @Nullable ProxySelector prior)
-    {
+
+    public GuardedProxySelector(OpGuard opguard, @Nullable ProxySelector prior) {
         this.opguard = Objects.requireNonNull(opguard, "opguard");
         this.prior = prior;
     }
-    
+
     @Override
-    public List<Proxy> select(URI uri)
-    {
+    public List<Proxy> select(URI uri) {
         Debug.log(() -> "[Proxy Selector] >>> SELECT: " + uri + " (" + uri.getHost() + ")");
-        
-        if (Connections.isBlockedDomain(uri.getHost()))
-        {
+
+        if (Connections.isBlockedDomain(uri.getHost())) {
             // TODO: ... block somehow
         }
-        
+
         return (prior == null) ? List.of(Proxy.NO_PROXY) : prior.select(uri);
     }
-    
+
     @Override
-    public void connectFailed(URI uri, SocketAddress sa, IOException ioe)
-    {
-        if (prior != null) { prior.connectFailed(uri, sa, ioe); }
+    public void connectFailed(URI uri, SocketAddress sa, IOException ioe) {
+        if (prior != null) {
+            prior.connectFailed(uri, sa, ioe);
+        }
     }
 }

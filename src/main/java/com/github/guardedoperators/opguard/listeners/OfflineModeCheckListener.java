@@ -32,38 +32,39 @@ import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Logger;
 
-public class OfflineModeCheckListener implements Listener
-{
+public class OfflineModeCheckListener implements Listener {
     private @Nullable Instant warning = null;
-    
+
     private final OpGuard opguard;
     private AuthenticationMode mode;
-    
-    public OfflineModeCheckListener(OpGuard opguard)
-    {
+
+    public OfflineModeCheckListener(OpGuard opguard) {
         this.opguard = Objects.requireNonNull(opguard, "opguard");
-        
+
         AuthenticationMode.Detected startup = AuthenticationMode.ofServer(opguard.server());
         opguard.logger().info("Detected " + startup);
-        
+
         this.mode = startup.mode();
         warnIfOfflineMode();
-        
+
         long delay = Duration.ofMinutes(30).toSeconds() * 20;
         opguard.server().getScheduler().runTaskTimer(opguard.plugin(), this::warnIfOfflineMode, delay, delay);
     }
-    
-    private void warnIfOfflineMode()
-    {
-        if (mode != AuthenticationMode.OFFLINE) { return; }
+
+    private void warnIfOfflineMode() {
+        if (mode != AuthenticationMode.OFFLINE) {
+            return;
+        }
         // TODO: add config option to disable warning
         // if (opguard.config().offlineMode()) { return; }
-        
-        if (!Cooldown.of30Minutes().since(warning)) { return; }
-        
+
+        if (!Cooldown.of30Minutes().since(warning)) {
+            return;
+        }
+
         warning = Instant.now();
         Logger logger = opguard.logger();
-        
+
         logger.warning("======================");
         logger.warning("OFFLINE MODE DETECTED!");
         logger.warning("======================");
@@ -72,18 +73,18 @@ public class OfflineModeCheckListener implements Listener
         logger.warning("This warning may be disabled in the config, but beware: support will NOT be provided to offline mode servers.");
         logger.warning("======================");
     }
-    
+
     @EventHandler
-    public void onPlayerJoin(PlayerJoinEvent event)
-    {
+    public void onPlayerJoin(PlayerJoinEvent event) {
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
-        
-        if (AuthenticationMode.ofUuid(uuid) == AuthenticationMode.OFFLINE)
-        {
+
+        if (AuthenticationMode.ofUuid(uuid) == AuthenticationMode.OFFLINE) {
             // An offline-mode player joined, server must be in offline mode
-            if (mode != AuthenticationMode.OFFLINE) { mode = AuthenticationMode.OFFLINE; }
-            
+            if (mode != AuthenticationMode.OFFLINE) {
+                mode = AuthenticationMode.OFFLINE;
+            }
+
             // TODO: check same warning config option mentioned above
             opguard.logger().warning(player.getName() + " joined with unauthenticated offline UUID: " + uuid);
             warnIfOfflineMode();

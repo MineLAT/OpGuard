@@ -25,28 +25,27 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-public final class OpGuardPlugin extends JavaPlugin implements Listener
-{
+public final class OpGuardPlugin extends JavaPlugin implements Listener {
     // https://bstats.org/plugin/bukkit/OpGuard/540
     public static final int BSTATS = 540;
-    
+
     @Override
-    public void onEnable()
-    {
+    public void onEnable() {
         Path dir = getDataFolder().toPath();
-        
-        if (!Files.isDirectory(dir))
-        {
-            try { Files.createDirectories(dir); }
-            catch (IOException e) { throw new RuntimeException(e); }
+
+        if (!Files.isDirectory(dir)) {
+            try {
+                Files.createDirectories(dir);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
-        
+
         OpGuard opguard = new OpGuard(this);
-        
+
         new UpdateCheckTask(opguard);
-        
-        if (opguard.config().metricsAreEnabled())
-        {
+
+        if (opguard.config().metricsAreEnabled()) {
             new Metrics(this, BSTATS);
         }
     }

@@ -27,20 +27,16 @@ import org.bukkit.event.server.PluginDisableEvent;
 
 import java.util.Objects;
 
-public final class PluginDisableListener implements Listener
-{
+public final class PluginDisableListener implements Listener {
     private final OpGuard opguard;
-    
-    public PluginDisableListener(OpGuard opguard)
-    {
+
+    public PluginDisableListener(OpGuard opguard) {
         this.opguard = Objects.requireNonNull(opguard, "opguard");
     }
-    
+
     @EventHandler
-    public void onPluginDisable(PluginDisableEvent event)
-    {
-        if (event.getPlugin() instanceof OpGuardPlugin && opguard.config().canShutDownOnDisable())
-        {
+    public void onPluginDisable(PluginDisableEvent event) {
+        if (event.getPlugin() instanceof OpGuardPlugin && opguard.config().canShutDownOnDisable()) {
             Messenger.console("&c[&fOpGuard was disabled&c] Shutting server down.");
             Bukkit.shutdown();
         }

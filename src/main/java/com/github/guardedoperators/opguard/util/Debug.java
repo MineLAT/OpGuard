@@ -21,13 +21,20 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.logging.Logger;
 
-public class Debug
-{
+public class Debug {
     private static final boolean ENABLED = Boolean.getBoolean("com.github.guardedoperators.opguard.debug");
-    
+
     private static final Logger LOGGER = Logger.getLogger("OpGuard (Debug)");
-    
-    public static void log(Supplier<String> message) { if (ENABLED) { LOGGER.info(message); } }
-    
-    public static void with(Consumer<Logger> action) { if (ENABLED) { action.accept(LOGGER); } }
+
+    public static void log(Supplier<String> message) {
+        if (ENABLED) {
+            LOGGER.info(message);
+        }
+    }
+
+    public static void with(Consumer<Logger> action) {
+        if (ENABLED) {
+            action.accept(LOGGER);
+        }
+    }
 }

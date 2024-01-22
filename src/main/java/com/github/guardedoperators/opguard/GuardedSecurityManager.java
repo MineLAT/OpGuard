@@ -23,54 +23,56 @@ import org.jetbrains.annotations.Nullable;
 import java.security.Permission;
 import java.util.Objects;
 
-final class GuardedSecurityManager extends SecurityManager
-{
-    static void setup(OpGuard opguard)
-    {
+final class GuardedSecurityManager extends SecurityManager {
+    static void setup(OpGuard opguard) {
         @Nullable SecurityManager existing = System.getSecurityManager();
         GuardedSecurityManager manager = new GuardedSecurityManager(opguard, existing);
         System.setSecurityManager(manager);
     }
-    
+
     private final OpGuard opguard;
     private final @Nullable SecurityManager prior;
-    
-    private GuardedSecurityManager(OpGuard opguard, @Nullable SecurityManager prior)
-    {
+
+    private GuardedSecurityManager(OpGuard opguard, @Nullable SecurityManager prior) {
         this.opguard = Objects.requireNonNull(opguard, "opguard");
         this.prior = prior;
     }
-    
+
     @Override
-    public void checkPermission(Permission perm, Object context)
-    {
-        if (prior != null) { prior.checkPermission(perm, context); }
+    public void checkPermission(Permission perm, Object context) {
+        if (prior != null) {
+            prior.checkPermission(perm, context);
+        }
     }
-    
+
     @Override
-    public void checkPermission(Permission perm)
-    {
-        if (prior != null) { prior.checkPermission(perm); }
+    public void checkPermission(Permission perm) {
+        if (prior != null) {
+            prior.checkPermission(perm);
+        }
     }
-    
+
     @Override
-    public void checkAccept(String host, int port)
-    {
+    public void checkAccept(String host, int port) {
         Debug.log(() -> "[Security Manager] >>> CHECK ACCEPT: " + host + ":" + port);
-        if (prior != null) { prior.checkAccept(host, port); }
+        if (prior != null) {
+            prior.checkAccept(host, port);
+        }
     }
-    
+
     @Override
-    public void checkConnect(String host, int port, Object context)
-    {
+    public void checkConnect(String host, int port, Object context) {
         Debug.log(() -> "[Security Manager] >>> CHECK CONNECT: " + host + ":" + port + " (" + context + ")");
-        if (prior != null) { prior.checkConnect(host, port, context); }
+        if (prior != null) {
+            prior.checkConnect(host, port, context);
+        }
     }
-    
+
     @Override
-    public void checkConnect(String host, int port)
-    {
+    public void checkConnect(String host, int port) {
         Debug.log(() -> "[Security Manager] >>> CHECK CONNECT: " + host + ":" + port);
-        if (prior != null) { prior.checkConnect(host, port); }
+        if (prior != null) {
+            prior.checkConnect(host, port);
+        }
     }
 }

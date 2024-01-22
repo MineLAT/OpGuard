@@ -17,8 +17,7 @@
  */
 package com.github.guardedoperators.opguard;
 
-public enum PunishmentReason
-{
+public enum PunishmentReason {
     PLAYER_OP_ATTEMPT,
     CONSOLE_OP_ATTEMPT,
     PLAYER_OPGUARD_ATTEMPT,

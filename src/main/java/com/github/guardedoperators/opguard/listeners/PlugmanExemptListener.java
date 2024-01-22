@@ -30,47 +30,45 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-public class PlugmanExemptListener implements Listener
-{
+public class PlugmanExemptListener implements Listener {
     private final OpGuard opguard;
-    
-    public PlugmanExemptListener(OpGuard opguard)
-    {
+
+    public PlugmanExemptListener(OpGuard opguard) {
         this.opguard = Objects.requireNonNull(opguard, "opguard");
         Stream.of(Bukkit.getPluginManager().getPlugins()).forEach(this::exemptFromPlugMan);
     }
-    
+
     @EventHandler
-    public void onPluginLoad(PluginEnableEvent event)
-    {
+    public void onPluginLoad(PluginEnableEvent event) {
         exemptFromPlugMan(event.getPlugin());
     }
-    
+
     @SuppressWarnings("unchecked")
-    private void exemptFromPlugMan(Plugin plugin)
-    {
-        if (!plugin.getName().equalsIgnoreCase("PlugMan")) { return; }
-        if (!opguard.config().canExemptSelfFromPlugMan()) { return; }
-        
+    private void exemptFromPlugMan(Plugin plugin) {
+        if (!plugin.getName().equalsIgnoreCase("PlugMan")) {
+            return;
+        }
+        if (!opguard.config().canExemptSelfFromPlugMan()) {
+            return;
+        }
+
         Runnable task = () ->
         {
-            try
-            {
+            try {
                 Field ignoredPluginsField = plugin.getClass().getDeclaredField("ignoredPlugins");
                 ignoredPluginsField.setAccessible(true);
                 List<String> ignored = (List<String>) ignoredPluginsField.get(plugin);
-                
+
                 String name = opguard.plugin().getName();
-                
-                if (!ignored.contains(name))
-                {
+
+                if (!ignored.contains(name)) {
                     ignored.add(name);
                     Messenger.console("&f[OpGuard] &9Exempted " + name + " from PlugMan.");
                 }
+            } catch (Exception ignored) {
             }
-            catch (Exception ignored) {}
         };
-        
+
         Bukkit.getScheduler().scheduleSyncDelayedTask(opguard.plugin(), task, 1L);
     }
 }

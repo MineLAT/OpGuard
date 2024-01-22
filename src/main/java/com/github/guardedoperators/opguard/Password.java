@@ -25,97 +25,98 @@ import java.security.NoSuchAlgorithmException;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
-public abstract class Password
-{
+public abstract class Password {
     public static final Password NO_PASSWORD = new NoPassword();
-    
-    public enum Algorithm
-    {
+
+    public enum Algorithm {
         NONE(hash -> NO_PASSWORD, UnaryOperator.identity()),
         SHA_256(Sha256Password::new, Sha256Password::legacySha256Hash),
         BCRYPT(BcryptPassword::new, BcryptPassword::bcryptHash);
-        
+
         private final Function<String, Password> constructor;
         private final UnaryOperator<String> hash;
-        
-        Algorithm(Function<String, Password> constructor, UnaryOperator<String> hash)
-        {
+
+        Algorithm(Function<String, Password> constructor, UnaryOperator<String> hash) {
             this.constructor = constructor;
             this.hash = hash;
         }
-        
-        public Password passwordFromHash(String hash) { return constructor.apply(hash); }
-        
-        public Password passwordFromPlainText(String plainText) { return passwordFromHash(hash.apply(plainText)); }
+
+        public Password passwordFromHash(String hash) {
+            return constructor.apply(hash);
+        }
+
+        public Password passwordFromPlainText(String plainText) {
+            return passwordFromHash(hash.apply(plainText));
+        }
     }
-    
+
     private final Algorithm algorithm;
     private final String hash;
-    
-    private Password(Algorithm algorithm, String hash)
-    {
+
+    private Password(Algorithm algorithm, String hash) {
         this.algorithm = algorithm;
         this.hash = hash;
     }
-    
-    public Algorithm algorithm() { return algorithm; }
-    
-    public String hash() { return this.hash; }
-    
-    public abstract boolean equalsPlainText(String plainText);
-    
-    private static class NoPassword extends Password
-    {
-        private NoPassword() { super(Algorithm.NONE, ""); }
-        
-        @Override
-        public boolean equalsPlainText(String plainText) { return plainText.isEmpty(); }
+
+    public Algorithm algorithm() {
+        return algorithm;
     }
-    
-    private static class Sha256Password extends Password
-    {
-        private static String legacySha256Hash(String plainText)
-        {
+
+    public String hash() {
+        return this.hash;
+    }
+
+    public abstract boolean equalsPlainText(String plainText);
+
+    private static class NoPassword extends Password {
+        private NoPassword() {
+            super(Algorithm.NONE, "");
+        }
+
+        @Override
+        public boolean equalsPlainText(String plainText) {
+            return plainText.isEmpty();
+        }
+    }
+
+    private static class Sha256Password extends Password {
+        private static String legacySha256Hash(String plainText) {
             // ;v( very bad no good
             String pass = plainText + " :^) Enjoy!";
-            
-            try
-            {
+
+            try {
                 byte[] hash = MessageDigest.getInstance("SHA-256").digest(pass.getBytes(StandardCharsets.UTF_8));
                 StringBuilder hashed = new StringBuilder();
-                for (byte b : hash) { hashed.append(String.format("%02X", b)); }
+                for (byte b : hash) {
+                    hashed.append(String.format("%02X", b));
+                }
                 return hashed.toString().toLowerCase();
+            } catch (NoSuchAlgorithmException e) {
+                throw new RuntimeException(e);
             }
-            catch (NoSuchAlgorithmException e) { throw new RuntimeException(e); }
         }
-        
-        private Sha256Password(String hash)
-        {
+
+        private Sha256Password(String hash) {
             super(Algorithm.SHA_256, hash);
         }
-        
+
         @Override
-        public boolean equalsPlainText(String plainText)
-        {
+        public boolean equalsPlainText(String plainText) {
             return hash().equals(legacySha256Hash(plainText));
         }
     }
-    
-    private static class BcryptPassword extends Password
-    {
-        private static String bcryptHash(String plainText)
-        {
+
+    private static class BcryptPassword extends Password {
+        private static String bcryptHash(String plainText) {
             return BCrypt.withDefaults().hashToString(12, plainText.toCharArray());
         }
-        
-        private BcryptPassword(String hash)
-        {
+
+        private BcryptPassword(String hash) {
             super(Algorithm.BCRYPT, hash);
         }
-        
+
         @Override
-        public boolean equalsPlainText(String plainText)
-        {
+        public boolean equalsPlainText(String plainText) {
             return BCrypt.verifyer().verify(plainText.toCharArray(), hash()).verified;
         }
     }

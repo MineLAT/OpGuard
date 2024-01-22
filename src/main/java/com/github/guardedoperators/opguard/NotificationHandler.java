@@ -22,60 +22,54 @@ import org.bukkit.entity.Player;
 
 import java.util.Objects;
 
-public class NotificationHandler
-{
+public class NotificationHandler {
     private final OpGuard opguard;
-    
-    NotificationHandler(OpGuard opguard)
-    {
+
+    NotificationHandler(OpGuard opguard) {
         this.opguard = Objects.requireNonNull(opguard, "opguard");
     }
-    
-    public void usernamePunished(String username)
-    {
+
+    public void usernamePunished(String username) {
         Placeholders placeholders = new Placeholders();
-        
+
         placeholders.map("player", "username").to(() -> username);
-        
+
         String message = placeholders.update("Punished %player% for attempting to gain op");
-        
+
         opguard.logger().warning(message);
     }
-    
-    public void playerHasAccessToAllPermissions(Player player)
-    {
+
+    public void playerHasAccessToAllPermissions(Player player) {
         Placeholders placeholders = new Placeholders();
-        
+
         placeholders.map("player").to(player::getName);
-        
+
         String message = placeholders.update("Player %player% has access to all permissions but isn't a verified operator");
-        
+
         opguard.logger().warning(message);
     }
-    
-    public void pluginAttemptedToGrantAllPermissions(PluginOnStack caught, Player player)
-    {
+
+    public void pluginAttemptedToGrantAllPermissions(PluginOnStack caught, Player player) {
         Placeholders placeholders = new Placeholders();
-        
+
         placeholders.map("plugin").to(caught::name);
         placeholders.map("player").to(player::getName);
-        
+
         String message = placeholders.update("The plugin %plugin% attempted to grant all permissions to %player%");
-        
+
         opguard.logger().warning(message);
     }
-    
-    public void pluginAllowedToGrantAllPermissions(PluginOnStack allowed, Player player)
-    {
+
+    public void pluginAllowedToGrantAllPermissions(PluginOnStack allowed, Player player) {
         Placeholders placeholders = new Placeholders();
-        
+
         placeholders.map("plugin").to(allowed::name);
         placeholders.map("player").to(player::getName);
-        
+
         String message = placeholders.update("The plugin %plugin% was allowed to grant all permissions to %player%");
-        
+
         opguard.logger().warning(message);
     }
-    
-    
+
+
 }

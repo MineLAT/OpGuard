@@ -19,9 +19,12 @@ package com.github.guardedoperators.opguard.util;
 
 import org.jetbrains.annotations.Nullable;
 
-public class Strings
-{
-    private Strings() { throw new UnsupportedOperationException(); }
-    
-    public static boolean isNullOrEmpty(@Nullable String text) { return text == null || text.isEmpty(); }
+public class Strings {
+    private Strings() {
+        throw new UnsupportedOperationException();
+    }
+
+    public static boolean isNullOrEmpty(@Nullable String text) {
+        return text == null || text.isEmpty();
+    }
 }

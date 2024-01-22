@@ -28,66 +28,77 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public final class PluginStackTrace
-{
-    public static Stream<Plugin> pluginsOnStack()
-    {
+public final class PluginStackTrace {
+    public static Stream<Plugin> pluginsOnStack() {
         return Arrays.stream(Thread.currentThread().getStackTrace())
-            .filter(Predicate.not(StackTraceElement::isNativeMethod))
-            .flatMap(element -> Plugins.pluginOfClassByName(element.getClassName()).stream());
+                .filter(Predicate.not(StackTraceElement::isNativeMethod))
+                .flatMap(element -> Plugins.pluginOfClassByName(element.getClassName()).stream());
     }
-    
-    static PluginStackTrace generate(OpGuard opguard)
-    {
+
+    static PluginStackTrace generate(OpGuard opguard) {
         return new PluginStackTrace(
-            opguard,
-            pluginsOnStack()
-                .filter(plugin -> plugin.getClass() != OpGuardPlugin.class)
-                .map(plugin -> new PluginOnStack(
-                    plugin, opguard.config().getExemptPlugins().contains(plugin.getName())
-                ))
-                .collect(Collectors.toList())
+                opguard,
+                pluginsOnStack()
+                        .filter(plugin -> plugin.getClass() != OpGuardPlugin.class)
+                        .map(plugin -> new PluginOnStack(
+                                plugin, opguard.config().getExemptPlugins().contains(plugin.getName())
+                        ))
+                        .collect(Collectors.toList())
         );
     }
-    
+
     private final List<PluginOnStack> allFoundPlugins;
     private final List<PluginOnStack> exemptPlugins;
     private final List<PluginOnStack> caughtPlugins;
-    
-    PluginStackTrace(OpGuard opguard, List<PluginOnStack> plugins)
-    {
+
+    PluginStackTrace(OpGuard opguard, List<PluginOnStack> plugins) {
         Objects.requireNonNull(opguard, "opguard");
         this.allFoundPlugins = List.copyOf(plugins);
-        
+
         List<PluginOnStack> exempt = new ArrayList<>();
         List<PluginOnStack> caught = new ArrayList<>();
-        
-        for (PluginOnStack found : plugins)
-        {
+
+        for (PluginOnStack found : plugins) {
             List<PluginOnStack> list =
-                (found.isExempt() && opguard.config().shouldExemptPlugins())
-                    ? exempt : caught;
-            
+                    (found.isExempt() && opguard.config().shouldExemptPlugins())
+                            ? exempt : caught;
+
             list.add(found);
         }
-        
+
         this.exemptPlugins = List.copyOf(exempt);
         this.caughtPlugins = List.copyOf(caught);
     }
-    
-    public List<PluginOnStack> allPlugins() { return allFoundPlugins; }
-    
-    public List<PluginOnStack> exemptPlugins() { return exemptPlugins; }
-    
-    public boolean hasExemptPlugins() { return exemptPlugins.size() > 0; }
-    
-    public boolean hasOnlyExemptPlugins() { return hasExemptPlugins() && !hasCaughtPlugins(); }
-    
-    public PluginOnStack topExemptPlugin() { return exemptPlugins.get(0); }
-    
-    public List<PluginOnStack> caughtPlugins() { return caughtPlugins; }
-    
-    public boolean hasCaughtPlugins() { return caughtPlugins.size() > 0; }
-    
-    public PluginOnStack topCaughtPlugin() { return caughtPlugins.get(0); }
+
+    public List<PluginOnStack> allPlugins() {
+        return allFoundPlugins;
+    }
+
+    public List<PluginOnStack> exemptPlugins() {
+        return exemptPlugins;
+    }
+
+    public boolean hasExemptPlugins() {
+        return exemptPlugins.size() > 0;
+    }
+
+    public boolean hasOnlyExemptPlugins() {
+        return hasExemptPlugins() && !hasCaughtPlugins();
+    }
+
+    public PluginOnStack topExemptPlugin() {
+        return exemptPlugins.get(0);
+    }
+
+    public List<PluginOnStack> caughtPlugins() {
+        return caughtPlugins;
+    }
+
+    public boolean hasCaughtPlugins() {
+        return caughtPlugins.size() > 0;
+    }
+
+    public PluginOnStack topCaughtPlugin() {
+        return caughtPlugins.get(0);
+    }
 }

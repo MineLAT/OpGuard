@@ -22,243 +22,217 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.jetbrains.annotations.Nullable;
 
-public final class Context
-{
-    public enum Cause
-    {
+public final class Context {
+    public enum Cause {
         OP_COMMAND,
         OPGUARD_COMMAND,
         INVALID_PERMISSION
     }
-    
-    public enum Source
-    {
+
+    public enum Source {
         PLUGIN,
         CONSOLE,
         PLAYER;
     }
-    
-    public enum Status
-    {
+
+    public enum Status {
         OKAY,
         WARN,
         SECURITY
     }
-    
+
     private @Nullable Cause cause = null;
     private @Nullable Source source = null;
     private Status status = Status.OKAY;
     private String message = "";
     private boolean punishmentActionTaken = false;
     private final OpGuardConfig config;
-    
-    public Context(OpGuard opguard)
-    {
+
+    public Context(OpGuard opguard) {
         this.config = opguard.config();
     }
-    
-    public Context(Context existing, boolean full)
-    {
+
+    public Context(Context existing, boolean full) {
         this.config = existing.config;
         this.cause = existing.cause;
         this.source = existing.source;
-        
-        if (full)
-        {
+
+        if (full) {
             this.status = existing.status;
             this.message = existing.message;
             this.punishmentActionTaken = existing.punishmentActionTaken;
         }
     }
-    
-    public Context setOp()
-    {
+
+    public Context setOp() {
         this.cause = Cause.OP_COMMAND;
         return this;
     }
-    
-    public Context incorrectlyUsedOpGuard()
-    {
+
+    public Context incorrectlyUsedOpGuard() {
         this.cause = Cause.OPGUARD_COMMAND;
         return this;
     }
-    
-    public Context hasInvalidPermissions()
-    {
+
+    public Context hasInvalidPermissions() {
         this.cause = Cause.INVALID_PERMISSION;
         return this;
     }
-    
-    public Context pluginAttempt()
-    {
+
+    public Context pluginAttempt() {
         this.source = Source.PLUGIN;
         return this;
     }
-    
-    public Context consoleAttempt()
-    {
+
+    public Context consoleAttempt() {
         this.source = Source.CONSOLE;
         return this;
     }
-    
-    public Context playerAttempt()
-    {
+
+    public Context playerAttempt() {
         this.source = Source.PLAYER;
         return this;
     }
-    
-    public Context attemptFrom(CommandSender sender)
-    {
-        if (sender instanceof ConsoleCommandSender) { return consoleAttempt(); }
-        else { return playerAttempt(); }
+
+    public Context attemptFrom(CommandSender sender) {
+        if (sender instanceof ConsoleCommandSender) {
+            return consoleAttempt();
+        } else {
+            return playerAttempt();
+        }
     }
-    
-    public Context warning(String message)
-    {
+
+    public Context warning(String message) {
         this.status = Status.WARN;
         return setMessage(message);
     }
-    
-    public Context okay(String message)
-    {
+
+    public Context okay(String message) {
         this.status = Status.OKAY;
         return setMessage(message);
     }
-    
-    public Context securityRisk(String message)
-    {
+
+    public Context securityRisk(String message) {
         this.status = Status.SECURITY;
         return setMessage(message);
     }
-    
-    public Context punishment()
-    {
+
+    public Context punishment() {
         punishmentActionTaken = true;
         return this;
     }
-    
-    public boolean isLoggable()
-    {
-        if (punishmentActionTaken) { return true; }
-        
-        if (source != null)
-        {
-            switch (source)
-            {
-                case PLAYER: return config.canLogPlayerAttempts();
-                case CONSOLE: return config.canLogConsoleAttempts();
-                case PLUGIN: return config.canLogPluginAttempts();
+
+    public boolean isLoggable() {
+        if (punishmentActionTaken) {
+            return true;
+        }
+
+        if (source != null) {
+            switch (source) {
+                case PLAYER:
+                    return config.canLogPlayerAttempts();
+                case CONSOLE:
+                    return config.canLogConsoleAttempts();
+                case PLUGIN:
+                    return config.canLogPluginAttempts();
             }
         }
-        
+
         return true;
     }
-    
-    public boolean isWarnable()
-    {
-        if (status == Status.SECURITY) { return config.canSendSecurityWarnings(); }
-        
-        if (source != null)
-        {
-            switch (source)
-            {
-                case PLAYER:
-                {
-                    if (cause != null)
-                    {
-                        switch (cause)
-                        {
-                            case OP_COMMAND: return config.canSendPlayerOpAttemptWarnings();
-                            case OPGUARD_COMMAND: return config.canSendPlayerOpGuardAttemptWarnings();
+
+    public boolean isWarnable() {
+        if (status == Status.SECURITY) {
+            return config.canSendSecurityWarnings();
+        }
+
+        if (source != null) {
+            switch (source) {
+                case PLAYER: {
+                    if (cause != null) {
+                        switch (cause) {
+                            case OP_COMMAND:
+                                return config.canSendPlayerOpAttemptWarnings();
+                            case OPGUARD_COMMAND:
+                                return config.canSendPlayerOpGuardAttemptWarnings();
                         }
                     }
                     break;
                 }
-                case CONSOLE:
-                {
-                    if (cause != null)
-                    {
-                        switch (cause)
-                        {
-                            case OP_COMMAND: return config.canSendConsoleOpAttemptWarnings();
-                            case OPGUARD_COMMAND: return config.canSendConsoleOpGuardAttemptWarnings();
+                case CONSOLE: {
+                    if (cause != null) {
+                        switch (cause) {
+                            case OP_COMMAND:
+                                return config.canSendConsoleOpAttemptWarnings();
+                            case OPGUARD_COMMAND:
+                                return config.canSendConsoleOpGuardAttemptWarnings();
                         }
                     }
                     break;
                 }
-                case PLUGIN:
-                {
+                case PLUGIN: {
                     return config.canSendPluginAttemptWarnings();
                 }
             }
         }
-        
+
         return true;
     }
-    
-    public boolean isPunishable()
-    {
-        if (source != null)
-        {
-            switch (source)
-            {
-                case CONSOLE:
-                {
-                    if (cause != null)
-                    {
-                        switch (cause)
-                        {
-                            case OP_COMMAND: return config.canPunishConsoleOpAttempts();
-                            case OPGUARD_COMMAND: return config.canPunishConsoleOpGuardAttempts();
+
+    public boolean isPunishable() {
+        if (source != null) {
+            switch (source) {
+                case CONSOLE: {
+                    if (cause != null) {
+                        switch (cause) {
+                            case OP_COMMAND:
+                                return config.canPunishConsoleOpAttempts();
+                            case OPGUARD_COMMAND:
+                                return config.canPunishConsoleOpGuardAttempts();
                         }
                     }
                     break;
                 }
-                case PLUGIN:
-                {
+                case PLUGIN: {
                     return config.canPunishPluginAttempts();
                 }
             }
         }
-        
-        if (cause == Cause.INVALID_PERMISSION)
-        {
+
+        if (cause == Cause.INVALID_PERMISSION) {
             return config.canCheckPermissions();
         }
-        
+
         return false;
     }
-    
-    private String prepare(String text)
-    {
-        switch (status)
-        {
-            case OKAY: return config.getOkayPrefix() + " &f" + text;
-            case WARN: return config.getWarningPrefix() + " &f" + text.replaceAll("<!>", config.getWarningEmphasisColor());
-            case SECURITY: return config.getSecurityPrefix() + " &f" + text;
+
+    private String prepare(String text) {
+        switch (status) {
+            case OKAY:
+                return config.getOkayPrefix() + " &f" + text;
+            case WARN:
+                return config.getWarningPrefix() + " &f" + text.replaceAll("<!>", config.getWarningEmphasisColor());
+            case SECURITY:
+                return config.getSecurityPrefix() + " &f" + text;
         }
-        
+
         return text;
     }
-    
-    public Context setMessage(String message)
-    {
+
+    public Context setMessage(String message) {
         this.message = prepare(message);
         return this;
     }
-    
-    public String getMessage()
-    {
+
+    public String getMessage() {
         return message;
     }
-    
-    public boolean hasMessage()
-    {
+
+    public boolean hasMessage() {
         return !message.isEmpty();
     }
-    
-    public Context copy()
-    {
+
+    public Context copy() {
         return new Context(this, false);
     }
 }
