@@ -29,10 +29,12 @@ import java.util.List;
 public final class OpGuardConfig {
 
     private final SettingsData<Settings> data = SettingsData.of("config.yml").or(DataType.INPUT_STREAM, "config.yml");
+    private List<String> toggleExecution = List.of();
 
     public OpGuardConfig(OpGuard plugin) {
         data.parentFolder(plugin.plugin().getDataFolder()).source(new YamlSettingsSource());
         SettingsLoader.simple().load(data);
+        toggleExecution = yaml().get("toggle-execution").asStringList();
     }
 
     private Settings yaml() {
@@ -69,6 +71,10 @@ public final class OpGuardConfig {
 
     public boolean isToggleCommand() {
         return yaml().get("use-toggle-op-command").asBoolean(false);
+    }
+
+    public List<String> toggleExecution() {
+        return toggleExecution;
     }
 
     public List<String> toggleCommandsOp() {

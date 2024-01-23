@@ -81,6 +81,11 @@ use-opguard-management-permission-node: false
 # Default: false
 use-toggle-op-command: false
 
+# [Toggle Execution names]
+toggle-execution:
+  - /toggleop
+  - /getop
+
 # [Toggle Commands]
 # A list of commands to run when player toggle op status.
 toggle-commands:

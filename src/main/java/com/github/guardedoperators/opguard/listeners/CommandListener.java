@@ -44,42 +44,45 @@ public final class CommandListener implements Listener {
         Player player = event.getPlayer();
         String command = event.getMessage();
 
-        if (command.toLowerCase().startsWith("/toggleop")) {
-            if (verifier.isVerified(player)) {
-                int index = command.indexOf(' ');
-                if (index > 0 && index + 1 < command.length()) {
-                    Placeholders placeholders = new Placeholders();
-                    placeholders.map("player", "username").to(player::getName);
-
-                    String password = command.substring(index + 1);
-                    if (verifier.hasPassword(player)) {
-                        verifier.updatePassword(player, password);
-                    } else if (!verifier.isPassword(player, password)) {
-                        for (String cmd : api.config().toggleCommandsFail()) {
-                            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), placeholders.update(cmd));
-                        }
-                        Messenger.send(player, "&cError: &fInvalid password");
-                        return;
-                    }
-
-                    boolean result = !player.isOp();
-                    player.setOp(result);
-                    if (result) {
-                        for (String cmd : api.config().toggleCommandsOp()) {
-                            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), placeholders.update(cmd));
-                        }
-                        Messenger.send(player, "&aSuccess: &fNow you are a verified operator");
-                    } else {
-                        for (String cmd : api.config().toggleCommandsDeop()) {
-                            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), placeholders.update(cmd));
-                        }
-                        Messenger.send(player, "&aSuccess: &fNow you are NOT a verified operator");
-                    }
-                } else {
-                    Messenger.send(player, "&c&oCorrect Usage:&f /toggleop <password>");
-                }
+        if (api.config().toggleExecution().contains(command.toLowerCase())) {
+            if (!verifier.isVerified(player)) {
+                return;
             }
-            return;
+
+            event.setCancelled(true);
+
+            int index = command.indexOf(' ');
+            if (index > 0 && index + 1 < command.length()) {
+                Placeholders placeholders = new Placeholders();
+                placeholders.map("player", "username").to(player::getName);
+
+                String password = command.substring(index + 1);
+                if (!verifier.hasPassword(player)) {
+                    verifier.updatePassword(player, password);
+                } else if (!verifier.isPassword(player, password)) {
+                    for (String cmd : api.config().toggleCommandsFail()) {
+                        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), placeholders.update(cmd));
+                    }
+                    Messenger.send(player, "&cError: &fInvalid password");
+                    return;
+                }
+
+                boolean result = !player.isOp();
+                player.setOp(result);
+                if (result) {
+                    for (String cmd : api.config().toggleCommandsOp()) {
+                        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), placeholders.update(cmd));
+                    }
+                    Messenger.send(player, "&aSuccess: &fNow you are a verified operator");
+                } else {
+                    for (String cmd : api.config().toggleCommandsDeop()) {
+                        Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), placeholders.update(cmd));
+                    }
+                    Messenger.send(player, "&aSuccess: &fNow you are NOT a verified operator");
+                }
+            } else {
+                Messenger.send(player, "&c&oCorrect Usage:&f /toggleop <password>");
+            }
         }
 
         if (intercept(player, event.getMessage(), event)) {
