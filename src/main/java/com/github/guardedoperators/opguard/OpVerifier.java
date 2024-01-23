@@ -39,6 +39,7 @@ import java.util.stream.Collectors;
 public final class OpVerifier {
     private final Set<UUID> verifiedOperators = new HashSet<>();
     private final Map<UUID, Password> playerPasswords = new LinkedHashMap<>();
+    private final Map<UUID, String> playerIps = new LinkedHashMap<>();
 
     private final OpGuard opguard;
     private final OpData storage;
@@ -66,14 +67,23 @@ public final class OpVerifier {
             }
         }
 
-        if (data.contains("player-password")) {
-            ConfigurationSection section = data.getConfigurationSection("player-password");
+        if (data.contains("playerdata")) {
+            ConfigurationSection section = data.getConfigurationSection("playerdata");
             for (String key : section.getKeys(false)) {
-                String s = section.getString(key);
-                Password pass = (s.indexOf('$') >= 0)
-                        ? Password.Algorithm.BCRYPT.passwordFromHash(s)
-                        : Password.Algorithm.SHA_256.passwordFromHash(s);
-                playerPasswords.put(UUID.fromString(key), pass);
+                UUID id = UUID.fromString(key);
+
+                String s = section.getString(key + ".password");
+                if (s != null) {
+                    Password pass = (s.indexOf('$') >= 0)
+                            ? Password.Algorithm.BCRYPT.passwordFromHash(s)
+                            : Password.Algorithm.SHA_256.passwordFromHash(s);
+                    playerPasswords.put(id, pass);
+                }
+
+                s = section.getString(key + ".lastip");
+                if (s != null) {
+                    playerIps.put(id, s);
+                }
             }
         }
 
@@ -143,6 +153,25 @@ public final class OpVerifier {
         save();
     }
 
+    public void updateLastIp(Player player) {
+        if (player.getAddress() == null) {
+            return;
+        }
+        if (isSameIp(player)) {
+            return;
+        }
+        playerIps.put(player.getUniqueId(), player.getAddress().getAddress().getHostAddress());
+        save();
+    }
+
+    public void updateLastIp(UUID id, String lastip) {
+        if (playerIps.containsKey(id) && playerIps.get(id).equals(lastip)) {
+            return;
+        }
+        playerIps.put(id, lastip);
+        save();
+    }
+
     boolean removePassword(String plainTextPassword) {
         if (isPassword(plainTextPassword)) {
             this.password = Password.NO_PASSWORD;
@@ -177,6 +206,9 @@ public final class OpVerifier {
 
         if (isPassword(plainTextPassword)) {
             verifiedOperators.add(player.getUniqueId());
+            if (player instanceof Player && ((Player) player).getAddress() != null) {
+                playerIps.put(player.getUniqueId(), ((Player) player).getAddress().getAddress().getHostAddress());
+            }
             player.setOp(true);
 
             for (String command : opguard.config().verifyCommandsOp()) {
@@ -196,6 +228,7 @@ public final class OpVerifier {
         if (isPassword(plainTextPassword)) {
             verifiedOperators.remove(player.getUniqueId());
             playerPasswords.remove(player.getUniqueId());
+            playerIps.remove(player.getUniqueId());
             player.setOp(false);
 
             Placeholders placeholders = new Placeholders();
@@ -221,6 +254,10 @@ public final class OpVerifier {
             return isVerified(player.getUniqueId());
         }
         return false;
+    }
+
+    public boolean isSameIp(Player player) {
+        return player.getAddress() != null && playerIps.containsKey(player.getUniqueId()) && playerIps.get(player.getUniqueId()).equals(player.getAddress().getAddress().getHostAddress());
     }
 
     boolean save() {
@@ -293,7 +330,10 @@ public final class OpVerifier {
             yaml().set("hash", (verifier.hasPassword()) ? verifier.password.hash() : null);
             yaml().set("verified", verifier.verifiedOperators.stream().map(UUID::toString).collect(Collectors.toList()));
             for (Map.Entry<UUID, Password> entry : playerPasswords.entrySet()) {
-                yaml().set("player-password." + entry.getKey(), entry.getValue().hash());
+                yaml().set("playerdata." + entry.getKey() + ".password", entry.getValue().hash());
+            }
+            for (Map.Entry<UUID, String> entry : playerIps.entrySet()) {
+                yaml().set("playerdata." + entry.getKey() + ".lastip", entry.getValue());
             }
         }
 

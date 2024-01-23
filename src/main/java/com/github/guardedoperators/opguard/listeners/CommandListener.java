@@ -67,6 +67,8 @@ public final class CommandListener implements Listener {
                     return;
                 }
 
+                verifier.updateLastIp(player);
+
                 boolean result = !player.isOp();
                 player.setOp(result);
                 if (result) {
@@ -81,7 +83,7 @@ public final class CommandListener implements Listener {
                     Messenger.send(player, "&aSuccess: &fNow you are NOT a verified operator");
                 }
             } else {
-                Messenger.send(player, "&c&oCorrect Usage:&f /toggleop <password>");
+                Messenger.send(player, "&c&oCorrect Usage:&f " + command + " <password>");
             }
             return;
         }
