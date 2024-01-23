@@ -110,6 +110,36 @@ public final class OpGuardConfig {
         return yaml().get("exempt-opguard-from-plugman").asBoolean(true);
     }
 
+    // Database
+
+    public boolean isMessengerEnabled() {
+        return yaml().get("messenger", "enabled").asBoolean(false);
+    }
+
+    public String getMessengerType() {
+        return yaml().get("messenger", "type").asString("REDIS");
+    }
+
+    public String getSqlUrl() {
+        return yaml().get("messenger", "sql", "url").asString("");
+    }
+
+    public String getSqlTablePrefix() {
+        return yaml().get("messenger", "sql", "table-prefix").asString("opguard_");
+    }
+
+    public String getSqlUsername() {
+        return yaml().get("messenger", "sql", "username").asString("root");
+    }
+
+    public String getSqlPassword() {
+        return yaml().get("messenger", "sql", "password").asString("password");
+    }
+
+    public String getRedisUrl() {
+        return yaml().get("messenger", "redis", "url").asString("");
+    }
+
     // Inspections
 
     public boolean canCheckPermissions() {
@@ -138,6 +168,10 @@ public final class OpGuardConfig {
 
     public boolean loggingIsEnabled() {
         return yaml().get("enable-logging").asBoolean(true);
+    }
+
+    public int getLogLevel() {
+        return yaml().get("log-level").asInt(3);
     }
 
     public boolean canLogPluginAttempts() {

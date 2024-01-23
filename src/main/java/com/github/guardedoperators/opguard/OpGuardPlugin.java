@@ -45,6 +45,8 @@ public final class OpGuardPlugin extends JavaPlugin implements Listener {
     // https://bstats.org/plugin/bukkit/OpGuard/540
     public static final int BSTATS = 540;
 
+    private OpGuard opguard;
+
     public OpGuardPlugin() {
         new EzlibLoader().logger((level, msg) -> {
             switch (level) {
@@ -78,12 +80,17 @@ public final class OpGuardPlugin extends JavaPlugin implements Listener {
             }
         }
 
-        OpGuard opguard = new OpGuard(this);
+        opguard = new OpGuard(this);
 
         new UpdateCheckTask(opguard);
 
         if (opguard.config().metricsAreEnabled()) {
             new Metrics(this, BSTATS);
         }
+    }
+
+    @Override
+    public void onDisable() {
+        opguard.delivery().unload();
     }
 }

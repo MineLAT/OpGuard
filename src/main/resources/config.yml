@@ -114,6 +114,36 @@ shutdown-on-disable: false
 # Default: true
 exempt-opguard-from-plugman: true
 
+# ---------------- #
+#     Database     #
+# ---------------- #
+
+# [Messenger]
+# Any related configuration about message delivery
+messenger:
+  # Enable or not this feature
+  enabled: false
+  # Messenger types:
+  # SQL      = Use the current SQL database if it's an external database type
+  # REDIS    = Use a Redis server for messaging (configure it below)
+  type: REDIS
+  # Sql configuration
+  sql:
+    # Sql url connection
+    url: "jdbc:mysql://localhost:3306/database?useSSL=false&verifyServerCertificate=false"
+    # Table prefix
+    table-prefix: "opguard_"
+    # Username credential for connection
+    username: root
+    # Password credential for connection
+    password: password
+  # Redis configuration
+  redis:
+    # Redis url connection
+    #
+    # URL format: redis://[user]:[password@]host[:port][/databaseNumber]
+    url: "redis://:password@localhost:6379/0"
+
 # --------------- #
 #   Inspections   #
 # --------------- #
@@ -170,6 +200,15 @@ exempt-plugins:
 # If false, all OpGuard logging will be disabled.
 # Default: true
 enable-logging: true
+
+# Log messages into console with a defined level
+# 1 = errors
+# 2 = 1 + warnings
+# 3 = 2 + information
+# 4 = 3 + debug
+# Set to 0 to disable
+# Default: 3
+log-level: 3
 
 # Log when a plugin attempts to give op.
 # Default: true

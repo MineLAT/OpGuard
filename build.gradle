@@ -32,6 +32,9 @@ dependencies {
     // Implementation
     compileOnly 'com.saicone.settings:settings:14d88b0f12'
     compileOnly 'com.saicone.settings:settings-yaml:14d88b0f12'
+    compileOnly 'com.saicone.delivery4j:delivery4j:1.0'
+    compileOnly 'com.saicone.delivery4j:delivery4j-hikari:1.0'
+    compileOnly 'com.saicone.delivery4j:delivery4j-redis:1.0'
     compileOnly 'at.favre.lib:bcrypt:0.9.0'
     implementation 'org.bstats:bstats-bukkit:2.2.1'
     compileOnly 'com.github.zafarkhaja:java-semver:0.9.0'
@@ -57,8 +60,12 @@ jar {
 
 shadowJar {
     archiveClassifier.set('')
+    relocate 'com.saicone.ezlib', project.group + '.ezlib'
     relocate 'com.saicone.settings', project.group + '.libs.settings'
     relocate 'org.yaml.snakeyaml', project.group + '.libs.snakeyaml'
+    relocate 'com.saicone.delivery4j', project.group + '.libs.delivery4j'
+    relocate 'com.zaxxer.hikari', project.group + '.libs.hikari'
+    relocate 'redis.clients.jedis', project.group + '.libs.jedis'
     relocate 'at.favre.lib.crypto.bcrypt', project.group + '.libs.bcrypt'
     relocate 'at.favre.lib.bytes', project.group + '.libs.bytes'
     relocate 'com.github.zafarkhaja.semver', project.group + '.libs.semver'

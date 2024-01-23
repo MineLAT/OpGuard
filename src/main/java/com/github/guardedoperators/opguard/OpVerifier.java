@@ -154,13 +154,14 @@ public final class OpVerifier {
     }
 
     public void updateLastIp(Player player) {
-        if (player.getAddress() == null) {
+        if (player.getAddress() == null || !isVerified(player.getUniqueId())) {
             return;
         }
         if (isSameIp(player)) {
             return;
         }
         playerIps.put(player.getUniqueId(), player.getAddress().getAddress().getHostAddress());
+
         save();
     }
 

@@ -254,6 +254,7 @@ final class OpGuardCommand {
         }
 
         api.config().reload();
+        api.delivery().load();
         context.okay(name + " reloaded OpGuard's config.");
         api.warn(context).log(context);
     }

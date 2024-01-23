@@ -25,8 +25,10 @@ import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.Listener;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Objects;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public final class OpGuard {
@@ -37,6 +39,7 @@ public final class OpGuard {
     private final NotificationHandler notifications;
     private final PunishmentHandler punishments;
     private final OpVerifier verifier;
+    private final OpGuardDelivery delivery;
     private final OpGuardCommand command;
 
     OpGuard(OpGuardPlugin plugin) {
@@ -53,6 +56,7 @@ public final class OpGuard {
         this.notifications = new NotificationHandler(this);
         this.punishments = new PunishmentHandler(this);
         this.verifier = new OpVerifier(this);
+        this.delivery = new OpGuardDelivery(this);
         this.command = new OpGuardCommand(this);
 
         register(new CommandListener(this));
@@ -102,6 +106,48 @@ public final class OpGuard {
 
     public OpVerifier verifier() {
         return verifier;
+    }
+
+    public OpGuardDelivery delivery() {
+        return delivery;
+    }
+
+    public void log(int level, @NotNull Throwable t) {
+        if (config.getLogLevel() >= level) {
+            switch (level) {
+                case 1:
+                    logger().log(Level.SEVERE, t, t::getMessage);
+                    break;
+                case 2:
+                    logger().log(Level.WARNING, t, t::getMessage);
+                    break;
+                case 3:
+                case 4:
+                    logger().log(Level.INFO, t, t::getMessage);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    public void log(int level, String message) {
+        if (config.getLogLevel() >= level) {
+            switch (level) {
+                case 1:
+                    logger().severe(message);
+                    break;
+                case 2:
+                    logger().warning(message);
+                    break;
+                case 3:
+                case 4:
+                    logger().info(message);
+                    break;
+                default:
+                    break;
+            }
+        }
     }
 
     @Deprecated
