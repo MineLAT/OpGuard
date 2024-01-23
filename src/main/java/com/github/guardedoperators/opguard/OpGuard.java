@@ -23,6 +23,7 @@ import com.github.guardedoperators.opguard.listeners.OfflineModeCheckListener;
 import com.github.guardedoperators.opguard.listeners.PermissionCheckListener;
 import com.github.guardedoperators.opguard.listeners.PluginDisableListener;
 import com.github.guardedoperators.opguard.listeners.PlugmanExemptListener;
+import com.github.guardedoperators.opguard.util.Versions;
 import com.github.zafarkhaja.semver.Version;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
@@ -46,7 +47,9 @@ public final class OpGuard {
         this.plugin = Objects.requireNonNull(plugin, "plugin");
         this.version = Version.valueOf(plugin.getDescription().getVersion());
 
-        GuardedSecurityManager.setup(this);
+        if (Versions.getRuntimeVersion() < 17) {
+            GuardedSecurityManager.setup(this);
+        }
         GuardedProxySelector.setup(this);
 
         this.log = new Log(plugin, "guard");
