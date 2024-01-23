@@ -67,6 +67,34 @@ public final class OpGuardConfig {
         return yaml().get("use-opguard-management-permission-node").asBoolean(false);
     }
 
+    public boolean isToggleCommand() {
+        return yaml().get("use-toggle-op-command").asBoolean(false);
+    }
+
+    public List<String> toggleCommandsOp() {
+        return yaml().get("toggle-commands", "op").asStringList();
+    }
+
+    public List<String> toggleCommandsDeop() {
+        return yaml().get("toggle-commands", "deop").asStringList();
+    }
+
+    public List<String> toggleCommandsFail() {
+        return yaml().get("toggle-commands", "fail").asStringList();
+    }
+
+    public List<String> verifyCommandsOp() {
+        return yaml().get("verify-commands", "op").asStringList();
+    }
+
+    public List<String> verifyCommandsDeop() {
+        return yaml().get("verify-commands", "deop").asStringList();
+    }
+
+    public List<String> verifyCommandsFail() {
+        return yaml().get("verify-commands", "fail").asStringList();
+    }
+
     public boolean canShutDownOnDisable() {
         return yaml().get("shutdown-on-disable").asBoolean(false);
     }

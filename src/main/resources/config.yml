@@ -35,6 +35,7 @@ lock: false
 
 # [Offline mode]
 # When enabled, OpGuard will ignore offline mode on server starting.
+# ---
 # Default: false
 offline-mode: false
 
@@ -73,6 +74,26 @@ manage-password-in-game: true
 # ---
 # Default: false
 use-opguard-management-permission-node: false
+
+# [Use /toggleop command for op gain]
+# When enabled, every verified player must use /toggleop command on join to get OP.
+# ---
+# Default: false
+use-toggle-op-command: false
+
+# [Toggle Commands]
+# A list of commands to run when player toggle op status.
+toggle-commands:
+  op: []
+  deop: []
+  fail: []
+
+# [Verify Commands]
+# A list of commands to run when player verify state change.
+verify-commands:
+  op: []
+  deop: []
+  fail: []
 
 # [Server Shutdown]
 # OpGuard will shut the server down if it is disabled.

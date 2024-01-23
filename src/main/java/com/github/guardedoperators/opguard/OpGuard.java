@@ -18,11 +18,7 @@
 package com.github.guardedoperators.opguard;
 
 import com.github.guardedoperators.opguard.config.OpGuardConfig;
-import com.github.guardedoperators.opguard.listeners.CommandListener;
-import com.github.guardedoperators.opguard.listeners.OfflineModeCheckListener;
-import com.github.guardedoperators.opguard.listeners.PermissionCheckListener;
-import com.github.guardedoperators.opguard.listeners.PluginDisableListener;
-import com.github.guardedoperators.opguard.listeners.PlugmanExemptListener;
+import com.github.guardedoperators.opguard.listeners.*;
 import com.github.guardedoperators.opguard.util.Versions;
 import com.github.zafarkhaja.semver.Version;
 import org.bukkit.Bukkit;
@@ -62,6 +58,7 @@ public final class OpGuard {
         register(new CommandListener(this));
         register(new OfflineModeCheckListener(this));
         register(new PermissionCheckListener(this));
+        register(new PlayerListener(this));
         register(new PluginDisableListener(this));
         register(new PlugmanExemptListener(this));
     }

@@ -19,10 +19,12 @@ package com.github.guardedoperators.opguard;
 
 import com.github.guardedoperators.opguard.config.WrappedConfig;
 import com.github.guardedoperators.opguard.util.Cooldown;
+import com.github.guardedoperators.opguard.util.Placeholders;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -43,6 +45,7 @@ import java.util.stream.Collectors;
 
 public final class OpVerifier {
     private final Map<UUID, OfflinePlayer> verifiedOperators = new LinkedHashMap<>();
+    private final Map<UUID, Password> playerPasswords = new LinkedHashMap<>();
 
     private final OpGuard opguard;
     private final OpData storage;
@@ -68,6 +71,17 @@ public final class OpVerifier {
                 UUID uuid = UUID.fromString(operator);
                 OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
                 verifiedOperators.put(uuid, player);
+            }
+        }
+
+        if (data.contains("player-password")) {
+            ConfigurationSection section = data.getConfigurationSection("player-password");
+            for (String key : section.getKeys(false)) {
+                String s = section.getString(key);
+                Password pass = (s.indexOf('$') >= 0)
+                        ? Password.Algorithm.BCRYPT.passwordFromHash(s)
+                        : Password.Algorithm.SHA_256.passwordFromHash(s);
+                playerPasswords.put(UUID.fromString(key), pass);
             }
         }
 
@@ -103,12 +117,24 @@ public final class OpVerifier {
         return password;
     }
 
+    public Password password(OfflinePlayer player) {
+        return playerPasswords.getOrDefault(player.getUniqueId(), Password.NO_PASSWORD);
+    }
+
     boolean hasPassword() {
         return password.algorithm() != Password.Algorithm.NONE;
     }
 
+    public boolean hasPassword(OfflinePlayer player) {
+        return playerPasswords.containsKey(player.getUniqueId());
+    }
+
     Password.Algorithm algorithm() {
         return (hasPassword()) ? password.algorithm() : Password.Algorithm.BCRYPT;
+    }
+
+    public Password.Algorithm algorithm(OfflinePlayer player) {
+        return (hasPassword(player)) ? password(player).algorithm() : Password.Algorithm.BCRYPT;
     }
 
     void updatePassword(String plainTextPassword) {
@@ -120,9 +146,22 @@ public final class OpVerifier {
         save();
     }
 
+    public void updatePassword(OfflinePlayer player, String plainTextPassword) {
+        playerPasswords.put(player.getUniqueId(), algorithm(player).passwordFromPlainText(plainTextPassword));
+        save();
+    }
+
     boolean removePassword(String plainTextPassword) {
         if (isPassword(plainTextPassword)) {
             this.password = Password.NO_PASSWORD;
+            return save();
+        }
+        return false;
+    }
+
+    public boolean removePassword(OfflinePlayer player, String plainTextPassword) {
+        if (isPassword(plainTextPassword)) {
+            playerPasswords.remove(player.getUniqueId());
             return save();
         }
         return false;
@@ -132,15 +171,31 @@ public final class OpVerifier {
         return password.equalsPlainText(plainTextPassword);
     }
 
+    public boolean isPassword(OfflinePlayer player, String plainTextPassword) {
+        return password(player).equalsPlainText(plainTextPassword);
+    }
+
     Collection<OfflinePlayer> getVerifiedOperators() {
         return Collections.unmodifiableCollection(verifiedOperators.values());
     }
 
     boolean op(OfflinePlayer player, String plainTextPassword) {
+        Placeholders placeholders = new Placeholders();
+        placeholders.map("player", "username").to(() -> player.getName() != null ? player.getName() : player.getUniqueId());
+
         if (isPassword(plainTextPassword)) {
             verifiedOperators.put(player.getUniqueId(), player);
             player.setOp(true);
+
+            for (String command : opguard.config().verifyCommandsOp()) {
+                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), placeholders.update(command));
+            }
+
             return save();
+        }
+
+        for (String command : opguard.config().verifyCommandsFail()) {
+            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), placeholders.update(command));
         }
         return false;
     }
@@ -148,7 +203,15 @@ public final class OpVerifier {
     boolean deop(OfflinePlayer player, String plainTextPassword) {
         if (isPassword(plainTextPassword)) {
             verifiedOperators.remove(player.getUniqueId());
+            playerPasswords.remove(player.getUniqueId());
             player.setOp(false);
+
+            Placeholders placeholders = new Placeholders();
+            placeholders.map("player", "username").to(() -> player.getName() != null ? player.getName() : player.getUniqueId());
+            for (String command : opguard.config().verifyCommandsDeop()) {
+                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), placeholders.update(command));
+            }
+
             return save();
         }
         return false;
@@ -233,8 +296,11 @@ public final class OpVerifier {
 
         private void reset() {
             OpVerifier verifier = OpVerifier.this;
-            yaml().set("hash", (verifier.hasPassword()) ? verifier.password().hash() : null);
+            yaml().set("hash", (verifier.hasPassword()) ? verifier.password.hash() : null);
             yaml().set("verified", uuidStringList(verifier.getVerifiedOperators()));
+            for (Map.Entry<UUID, Password> entry : playerPasswords.entrySet()) {
+                yaml().set("player-password." + entry.getKey(), entry.getValue().hash());
+            }
         }
 
         private List<String> uuidStringList(Collection<OfflinePlayer> offline) {

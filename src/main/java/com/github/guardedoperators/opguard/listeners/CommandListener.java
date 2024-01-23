@@ -17,10 +17,11 @@
  */
 package com.github.guardedoperators.opguard.listeners;
 
-import com.github.guardedoperators.opguard.Context;
-import com.github.guardedoperators.opguard.OpGuard;
-import com.github.guardedoperators.opguard.PluginStackChecker;
+import com.github.guardedoperators.opguard.*;
+import com.github.guardedoperators.opguard.util.Placeholders;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -31,16 +32,57 @@ import org.bukkit.event.server.ServerCommandEvent;
 
 public final class CommandListener implements Listener {
     private final OpGuard api;
+    private final OpVerifier verifier;
 
     public CommandListener(OpGuard api) {
         this.api = api;
+        this.verifier = api.verifier();
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerCommand(PlayerCommandPreprocessEvent event) {
+        Player player = event.getPlayer();
         String command = event.getMessage();
 
-        if (intercept(event.getPlayer(), event.getMessage(), event)) {
+        if (command.toLowerCase().startsWith("/toggleop")) {
+            if (verifier.isVerified(player)) {
+                int index = command.indexOf(' ');
+                if (index > 0 && index + 1 < command.length()) {
+                    Placeholders placeholders = new Placeholders();
+                    placeholders.map("player", "username").to(player::getName);
+
+                    String password = command.substring(index + 1);
+                    if (verifier.hasPassword(player)) {
+                        verifier.updatePassword(player, password);
+                    } else if (!verifier.isPassword(player, password)) {
+                        for (String cmd : api.config().toggleCommandsFail()) {
+                            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), placeholders.update(cmd));
+                        }
+                        Messenger.send(player, "&cError: &fInvalid password");
+                        return;
+                    }
+
+                    boolean result = !player.isOp();
+                    player.setOp(result);
+                    if (result) {
+                        for (String cmd : api.config().toggleCommandsOp()) {
+                            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), placeholders.update(cmd));
+                        }
+                        Messenger.send(player, "&aSuccess: &fNow you are a verified operator");
+                    } else {
+                        for (String cmd : api.config().toggleCommandsDeop()) {
+                            Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), placeholders.update(cmd));
+                        }
+                        Messenger.send(player, "&aSuccess: &fNow you are NOT a verified operator");
+                    }
+                } else {
+                    Messenger.send(player, "&c&oCorrect Usage:&f /toggleop <password>");
+                }
+            }
+            return;
+        }
+
+        if (intercept(player, event.getMessage(), event)) {
             event.setMessage(collapse(command));
         }
     }
