@@ -55,8 +55,10 @@ public class OfflineModeCheckListener implements Listener {
         if (mode != AuthenticationMode.OFFLINE) {
             return;
         }
-        // TODO: add config option to disable warning
-        // if (opguard.config().offlineMode()) { return; }
+
+        if (opguard.config().isOfflineMode()) {
+            return;
+        }
 
         if (!Cooldown.of30Minutes().since(warning)) {
             return;
@@ -76,6 +78,10 @@ public class OfflineModeCheckListener implements Listener {
 
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent event) {
+        if (opguard.config().isOfflineMode()) {
+            return;
+        }
+
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
 
@@ -85,7 +91,6 @@ public class OfflineModeCheckListener implements Listener {
                 mode = AuthenticationMode.OFFLINE;
             }
 
-            // TODO: check same warning config option mentioned above
             opguard.logger().warning(player.getName() + " joined with unauthenticated offline UUID: " + uuid);
             warnIfOfflineMode();
         }

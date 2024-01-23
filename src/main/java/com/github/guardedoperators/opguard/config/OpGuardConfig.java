@@ -47,6 +47,10 @@ public final class OpGuardConfig {
         return yaml().get("lock").asBoolean(false);
     }
 
+    public boolean isOfflineMode() {
+        return yaml().get("offline-mode").asBoolean(false);
+    }
+
     public boolean canOnlyOpIfOnline() {
         return yaml().get("only-op-if-online").asBoolean(true);
     }

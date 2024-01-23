@@ -33,6 +33,11 @@
 # Default: false
 lock: false
 
+# [Offline mode]
+# When enabled, OpGuard will ignore offline mode on server starting.
+# Default: false
+offline-mode: false
+
 # [Online-Only Op]
 # OpGuard will only op players if they're online.
 #   - /opguard op <player>
