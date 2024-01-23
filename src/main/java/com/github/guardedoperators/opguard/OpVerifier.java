@@ -161,7 +161,7 @@ public final class OpVerifier {
             return;
         }
         playerIps.put(player.getUniqueId(), player.getAddress().getAddress().getHostAddress());
-
+        opguard.delivery().sendLastIp(player);
         save();
     }
 

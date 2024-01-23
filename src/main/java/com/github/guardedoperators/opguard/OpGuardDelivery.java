@@ -7,6 +7,7 @@ import com.saicone.delivery4j.client.RedisDelivery;
 import com.saicone.ezlib.Dependencies;
 import com.saicone.ezlib.Dependency;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 
@@ -42,6 +43,10 @@ public class OpGuardDelivery extends AbstractMessenger {
     OpGuardDelivery(OpGuard opguard) {
         this.opguard = Objects.requireNonNull(opguard, "opguard");
         load();
+    }
+
+    public void sendLastIp(@NotNull Player player) {
+        send(LASTIP_CHANNEL, player.getUniqueId(), player.getAddress().getAddress().getHostAddress());
     }
 
     public void load() {
