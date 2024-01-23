@@ -23,12 +23,18 @@ processResources {
 dependencies {
     compileOnly 'org.spigotmc:spigot-api:1.20.4-R0.1-SNAPSHOT'
 
-    implementation 'com.saicone.settings:settings:14d88b0f12'
-    implementation 'com.saicone.settings:settings-yaml:14d88b0f12'
-    implementation 'at.favre.lib:bcrypt:0.9.0'
+    // Library loader
+    implementation 'com.saicone.ezlib:ezlib:1.2.3'
+    implementation 'com.saicone.ezlib:loader:1.2.3'
+    compileOnly 'com.saicone.ezlib:annotations:1.2.3'
+    annotationProcessor 'com.saicone.ezlib:annotations:1.2.3'
+
+    // Implementation
+    compileOnly 'com.saicone.settings:settings:14d88b0f12'
+    compileOnly 'com.saicone.settings:settings-yaml:14d88b0f12'
+    compileOnly 'at.favre.lib:bcrypt:0.9.0'
     implementation 'org.bstats:bstats-bukkit:2.2.1'
-    implementation 'com.github.zafarkhaja:java-semver:0.9.0'
-    implementation 'at.favre.lib:bcrypt:0.9.0'
+    compileOnly 'com.github.zafarkhaja:java-semver:0.9.0'
 
     compileOnly 'org.jetbrains:annotations:24.1.0'
 

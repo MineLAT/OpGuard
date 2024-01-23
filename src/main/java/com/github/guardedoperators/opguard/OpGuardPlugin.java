@@ -17,6 +17,9 @@
  */
 package com.github.guardedoperators.opguard;
 
+import com.saicone.ezlib.Dependencies;
+import com.saicone.ezlib.Dependency;
+import com.saicone.ezlib.EzlibLoader;
 import org.bstats.bukkit.Metrics;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -25,9 +28,43 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
+@Dependencies({
+        @Dependency(value = "com.saicone.settings:settings-yaml:14d88b0f12", relocate = {
+                "com.saicone.settings", "{package}.libs.settings",
+                "org.yaml.snakeyaml", "{package}.libs.snakeyaml"
+        }),
+        @Dependency(value = "at.favre.lib:bcrypt:0.9.0", relocate = {
+                "at.favre.lib.crypto.bcrypt", "{package}.libs.bcrypt",
+                "at.favre.lib.bytes", "{package}.libs.bytes"
+        }),
+        @Dependency(value = "com.github.zafarkhaja:java-semver:0.9.0", relocate = {
+                "com.github.zafarkhaja.semver", "{package}.libs.semver"
+        })
+})
 public final class OpGuardPlugin extends JavaPlugin implements Listener {
     // https://bstats.org/plugin/bukkit/OpGuard/540
     public static final int BSTATS = 540;
+
+    public OpGuardPlugin() {
+        new EzlibLoader().logger((level, msg) -> {
+            switch (level) {
+                case 1:
+                    if (msg.contains("insecure protocol")) {
+                        break;
+                    }
+                    getLogger().severe(msg);
+                    break;
+                case 2:
+                    getLogger().warning(msg);
+                    break;
+                case 3:
+                    getLogger().info(msg);
+                    break;
+                default:
+                    break;
+            }
+        }).replace("{package}", "com.github.guardedoperators.opguard").load();
+    }
 
     @Override
     public void onEnable() {
