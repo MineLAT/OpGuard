@@ -33,18 +33,11 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Instant;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public final class OpVerifier {
-    private final Map<UUID, OfflinePlayer> verifiedOperators = new LinkedHashMap<>();
+    private final Set<UUID> verifiedOperators = new HashSet<>();
     private final Map<UUID, Password> playerPasswords = new LinkedHashMap<>();
 
     private final OpGuard opguard;
@@ -69,8 +62,7 @@ public final class OpVerifier {
         if (data.contains("verified")) {
             for (String operator : data.getStringList("verified")) {
                 UUID uuid = UUID.fromString(operator);
-                OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
-                verifiedOperators.put(uuid, player);
+                verifiedOperators.add(uuid);
             }
         }
 
@@ -175,8 +167,8 @@ public final class OpVerifier {
         return password(player).equalsPlainText(plainTextPassword);
     }
 
-    Collection<OfflinePlayer> getVerifiedOperators() {
-        return Collections.unmodifiableCollection(verifiedOperators.values());
+    Collection<UUID> getVerifiedOperators() {
+        return Collections.unmodifiableSet(verifiedOperators);
     }
 
     boolean op(OfflinePlayer player, String plainTextPassword) {
@@ -184,7 +176,7 @@ public final class OpVerifier {
         placeholders.map("player", "username").to(() -> player.getName() != null ? player.getName() : player.getUniqueId());
 
         if (isPassword(plainTextPassword)) {
-            verifiedOperators.put(player.getUniqueId(), player);
+            verifiedOperators.add(player.getUniqueId());
             player.setOp(true);
 
             for (String command : opguard.config().verifyCommandsOp()) {
@@ -218,7 +210,7 @@ public final class OpVerifier {
     }
 
     public boolean isVerified(UUID uuid) {
-        return verifiedOperators.containsKey(uuid);
+        return verifiedOperators.contains(uuid);
     }
 
     public boolean isVerified(CommandSender sender) {
@@ -262,8 +254,10 @@ public final class OpVerifier {
                     context.okay("Migrating old data to OpGuard's new data storage format...");
                 } else {
                     // Fresh install: no old data to transfer
-                    yaml().set("verified", uuidStringList(Bukkit.getOperators()));
-                    context.okay("Loading for the first time... Adding all existing operators to the verified list");
+                    try {
+                        yaml().set("verified", uuidStringList(Bukkit.getOperators()));
+                        context.okay("Loading for the first time... Adding all existing operators to the verified list");
+                    } catch (Throwable ignored) { }
                 }
                 opguard.warn(context).log(context);
                 save(false); // Saving the new data file; must be in sync to properly save inside OpGuard's onEnable() method.
@@ -297,7 +291,7 @@ public final class OpVerifier {
         private void reset() {
             OpVerifier verifier = OpVerifier.this;
             yaml().set("hash", (verifier.hasPassword()) ? verifier.password.hash() : null);
-            yaml().set("verified", uuidStringList(verifier.getVerifiedOperators()));
+            yaml().set("verified", verifier.verifiedOperators.stream().map(UUID::toString).collect(Collectors.toList()));
             for (Map.Entry<UUID, Password> entry : playerPasswords.entrySet()) {
                 yaml().set("player-password." + entry.getKey(), entry.getValue().hash());
             }

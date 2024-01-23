@@ -44,14 +44,14 @@ public final class CommandListener implements Listener {
         Player player = event.getPlayer();
         String command = event.getMessage();
 
-        if (api.config().toggleExecution().contains(command.toLowerCase())) {
+        int index = command.indexOf(' ');
+        if (api.config().isToggleCommand() && api.config().toggleExecution().contains(index < 0 ? command.toLowerCase() : command.substring(0, index).toLowerCase())) {
             if (!verifier.isVerified(player)) {
                 return;
             }
 
             event.setCancelled(true);
 
-            int index = command.indexOf(' ');
             if (index > 0 && index + 1 < command.length()) {
                 Placeholders placeholders = new Placeholders();
                 placeholders.map("player", "username").to(player::getName);
@@ -83,6 +83,7 @@ public final class CommandListener implements Listener {
             } else {
                 Messenger.send(player, "&c&oCorrect Usage:&f /toggleop <password>");
             }
+            return;
         }
 
         if (intercept(player, event.getMessage(), event)) {

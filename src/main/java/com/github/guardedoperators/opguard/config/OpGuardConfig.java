@@ -43,6 +43,7 @@ public final class OpGuardConfig {
 
     public void reload() {
         SettingsLoader.simple().load(data);
+        toggleExecution = yaml().get("toggle-execution").asStringList();
     }
 
     public boolean isLocked() {

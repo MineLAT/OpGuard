@@ -68,7 +68,14 @@ final class OpGuardCommand {
 
             case "list":
                 List<String> names = new ArrayList<>();
-                verifier.getVerifiedOperators().forEach(o -> names.add(o.getName()));
+                verifier.getVerifiedOperators().forEach(o -> {
+                    OfflinePlayer player = Bukkit.getOfflinePlayer(o);
+                    if (player.getName() == null) {
+                        names.add(player.getUniqueId().toString());
+                    } else {
+                        names.add(player.getName());
+                    }
+                });
 
                 Messenger.send(sender, "&6(&e&lVerified Operators&6) &fTotal: &6" + names.size());
                 if (names.size() <= 0) {
