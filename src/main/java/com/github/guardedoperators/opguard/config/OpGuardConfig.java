@@ -18,213 +18,178 @@
 package com.github.guardedoperators.opguard.config;
 
 import com.github.guardedoperators.opguard.OpGuard;
-import com.github.guardedoperators.opguard.util.Versions;
-import com.github.zafarkhaja.semver.Version;
-import org.bukkit.configuration.InvalidConfigurationException;
+import com.saicone.settings.Settings;
+import com.saicone.settings.SettingsData;
+import com.saicone.settings.SettingsLoader;
+import com.saicone.settings.data.DataType;
+import com.saicone.settings.source.YamlSettingsSource;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.List;
 
-public final class OpGuardConfig extends WrappedConfig {
-    public OpGuardConfig(OpGuard opguard) {
-        super(opguard.plugin(), "config.yml");
+public final class OpGuardConfig {
 
-        reloadsWith(e ->
-        {
-            Version loadedVersion = Versions.parseOrZero(yaml().getString("version"));
+    private final SettingsData<Settings> data = SettingsData.of("config.yml").or(DataType.INPUT_STREAM, "config.yml");
 
-            if (loadedVersion.lessThan(opguard.version())) {
-                try {
-                    migrateConfig(loadedVersion);
-                } catch (IOException io) {
-                    io.printStackTrace();
-                }
-            }
-        });
+    public OpGuardConfig(OpGuard plugin) {
+        data.parentFolder(plugin.plugin().getDataFolder()).source(new YamlSettingsSource());
+        SettingsLoader.simple().load(data);
     }
 
-    private void migrateConfig(Version version) throws IOException {
-        ConfigurationTemplate template = new ConfigurationTemplate("config.template.yml");
-        List<String> lines = template.apply(yaml());
+    private Settings yaml() {
+        return data.getLoaded();
+    }
 
-        Path backups = path().getParent().resolve("backups");
-
-        if (!Files.isDirectory(backups)) {
-            Files.createDirectories(backups);
-        }
-
-        if (Files.isRegularFile(path())) {
-            String name = "config.yml.backup-v" + version;
-            int attempt = 1;
-            Path rename;
-
-            do {
-                rename = backups.resolve(name + "_" + attempt++);
-            }
-            while (Files.isRegularFile(rename));
-
-            Files.move(path(), rename);
-        }
-
-        Files.write(path(), lines, StandardCharsets.UTF_8);
-
-        try {
-            yaml().loadFromString(String.join("\n", lines));
-        } catch (InvalidConfigurationException e) {
-            e.printStackTrace();
-        }
+    public void reload() {
+        SettingsLoader.simple().load(data);
     }
 
     public boolean isLocked() {
-        return yaml().getBoolean("lock");
+        return yaml().get("lock").asBoolean(false);
     }
 
     public boolean canOnlyOpIfOnline() {
-        return yaml().getBoolean("only-op-if-online");
+        return yaml().get("only-op-if-online").asBoolean(true);
     }
 
     public boolean canOnlyDeopIfOnline() {
-        return yaml().getBoolean("only-deop-if-online");
+        return yaml().get("only-deop-if-online").asBoolean(false);
     }
 
     public boolean canManagePasswordInGame() {
-        return yaml().getBoolean("manage-password-in-game");
+        return yaml().get("manage-password-in-game").asBoolean(true);
     }
 
     public boolean isManagementPermissionEnabled() {
-        return yaml().getBoolean("use-opguard-management-permission-node");
+        return yaml().get("use-opguard-management-permission-node").asBoolean(false);
     }
 
     public boolean canShutDownOnDisable() {
-        return yaml().getBoolean("shutdown-on-disable");
+        return yaml().get("shutdown-on-disable").asBoolean(false);
     }
 
     public boolean canExemptSelfFromPlugMan() {
-        return yaml().getBoolean("exempt-opguard-from-plugman");
+        return yaml().get("exempt-opguard-from-plugman").asBoolean(true);
     }
 
     // Inspections
 
     public boolean canCheckPermissions() {
-        return yaml().getBoolean("check-permissions");
+        return yaml().get("check-permissions").asBoolean(true);
     }
 
     public boolean canDisableOtherPlugins() {
-        return yaml().getBoolean("disable-malicious-plugins-when-caught");
+        return yaml().get("disable-malicious-plugins-when-caught").asBoolean(true);
     }
 
     public boolean canRenameOtherPlugins() {
-        return canDisableOtherPlugins() && yaml().getBoolean("rename-malicious-plugins-when-caught");
+        return canDisableOtherPlugins() && yaml().get("rename-malicious-plugins-when-caught").asBoolean(true);
     }
 
     // Plugin Exemptions
 
     public boolean shouldExemptPlugins() {
-        return yaml().getBoolean("enable-exempt-plugins");
+        return yaml().get("enable-exempt-plugins").asBoolean(true);
     }
 
     public List<String> getExemptPlugins() {
-        return yaml().getStringList("exempt-plugins");
+        return yaml().get("exempt-plugins").asStringList();
     }
 
     // Logging
 
     public boolean loggingIsEnabled() {
-        return yaml().getBoolean("enable-logging");
+        return yaml().get("enable-logging").asBoolean(true);
     }
 
     public boolean canLogPluginAttempts() {
-        return yaml().getBoolean("log-plugin-attempts");
+        return yaml().get("log-plugin-attempts").asBoolean(true);
     }
 
     public boolean canLogConsoleAttempts() {
-        return yaml().getBoolean("log-console-attempts");
+        return yaml().get("log-console-attempts").asBoolean(true);
     }
 
     public boolean canLogPlayerAttempts() {
-        return yaml().getBoolean("log-player-attempts");
+        return yaml().get("log-player-attempts").asBoolean(true);
     }
 
     // Messages
 
     public String getWarningPrefix() {
-        return yaml().getString("warn-prefix", "");
+        return yaml().get("warn-prefix").asString("&cOpGuard (&4&lWarning&c)&7:");
     }
 
     public String getWarningEmphasisColor() {
-        return yaml().getString("warn-emphasis-color", "");
+        return yaml().get("warn-emphasis-color").asString("&c");
     }
 
     public boolean canSendPluginAttemptWarnings() {
-        return yaml().getBoolean("warn-plugin-attempts");
+        return yaml().get("warn-plugin-attempts").asBoolean(true);
     }
 
     public boolean canSendConsoleOpAttemptWarnings() {
-        return yaml().getBoolean("warn-console-op-attempts");
+        return yaml().get("warn-console-op-attempts").asBoolean(true);
     }
 
     public boolean canSendConsoleOpGuardAttemptWarnings() {
-        return yaml().getBoolean("warn-console-opguard-attempts");
+        return yaml().get("warn-console-opguard-attempts").asBoolean(true);
     }
 
     public boolean canSendPlayerOpAttemptWarnings() {
-        return yaml().getBoolean("warn-player-op-attempts");
+        return yaml().get("warn-player-op-attempts").asBoolean(true);
     }
 
     public boolean canSendPlayerOpGuardAttemptWarnings() {
-        return yaml().getBoolean("warn-player-opguard-attempts");
+        return yaml().get("warn-player-opguard-attempts").asBoolean(true);
     }
 
     public String getSecurityPrefix() {
-        return yaml().getString("security-prefix", "");
+        return yaml().get("security-prefix").asString("&eOpGuard (&6&lSecurity&e)&7:");
     }
 
     public boolean canSendSecurityWarnings() {
-        return yaml().getBoolean("enable-security-warnings");
+        return yaml().get("enable-security-warnings").asBoolean(true);
     }
 
     public String getOkayPrefix() {
-        return yaml().getString("okay-prefix", "");
+        return yaml().get("okay-prefix").asString("&aOpGuard (&2&lOkay&a)&7:");
     }
 
     // Punishments
 
     public boolean canPunishPluginAttempts() {
-        return yaml().getBoolean("punish-plugin-attempts");
+        return yaml().get("punish-plugin-attempts").asBoolean(true);
     }
 
     public boolean canPunishConsoleOpAttempts() {
-        return yaml().getBoolean("punish-console-op-attempts");
+        return yaml().get("punish-console-op-attempts").asBoolean(true);
     }
 
     public boolean canPunishConsoleOpGuardAttempts() {
-        return yaml().getBoolean("punish-console-opguard-attempts");
+        return yaml().get("punish-console-opguard-attempts").asBoolean(false);
     }
 
     public List<String> getPunishmentCommands() {
-        return yaml().getStringList("punishment-commands");
+        return yaml().get("punishment-commands").asStringList();
     }
 
     // Update Checks
 
     public boolean canCheckForUpdates() {
-        return yaml().getBoolean("check-for-updates");
+        return yaml().get("check-for-updates").asBoolean(false);
     }
 
     public long getUpdateCheckInterval() {
-        return yaml().getLong("update-interval");
+        return yaml().get("update-interval").asLong(12L);
     }
 
     // Metrics
 
     public boolean metricsAreEnabled() {
-        return yaml().getBoolean("metrics");
+        return yaml().get("metrics").asBoolean(true);
     }
 
     public String getVersion() {
-        return yaml().getString("version");
+        return yaml().get("version").asString();
     }
 }
