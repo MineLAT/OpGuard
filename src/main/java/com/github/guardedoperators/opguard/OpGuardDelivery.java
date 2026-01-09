@@ -1,39 +1,18 @@
 package com.github.guardedoperators.opguard;
 
 import com.saicone.delivery4j.AbstractMessenger;
-import com.saicone.delivery4j.DeliveryClient;
-import com.saicone.delivery4j.client.HikariDelivery;
-import com.saicone.delivery4j.client.RedisDelivery;
-import com.saicone.ezlib.Dependencies;
-import com.saicone.ezlib.Dependency;
-import org.bukkit.Bukkit;
+import com.saicone.delivery4j.Broker;
+import com.saicone.delivery4j.broker.HikariBroker;
+import com.saicone.delivery4j.broker.RedisBroker;
+import com.saicone.delivery4j.util.LogFilter;
 import org.bukkit.entity.Player;
-import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
+import redis.clients.jedis.RedisClient;
 
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
-@Dependencies(value = {
-        @Dependency("com.saicone.delivery4j:delivery4j:1.0"),
-        @Dependency(value = "com.saicone.delivery4j:delivery4j-hikari:1.0",
-                relocate = {"com.zaxxer.hikari", "{package}.libs.hikari"}
-        ),
-        @Dependency(value = "com.saicone.delivery4j:delivery4j-redis:1.0",
-                relocate = {
-                        "redis.clients.jedis", "{package}.libs.jedis",
-                        "com.google.gson", "{package}.libs.gson",
-                        "org.apache.commons.pool2", "{package}.libs.commons.pool2",
-                        "org.json", "{package}.libs.json"
-                }
-        ),
-        @Dependency("org.slf4j:slf4j-nop:1.7.36")
-}, relocations = {
-        "com.saicone.delivery4j", "{package}.libs.delivery4j",
-        "org.slf4j", "{package}.libs.slf4j"
-})
 public class OpGuardDelivery extends AbstractMessenger {
 
     private static final String LASTIP_CHANNEL = "opguard:lastip";
@@ -52,11 +31,13 @@ public class OpGuardDelivery extends AbstractMessenger {
     public void load() {
         close();
         if (opguard.config().isMessengerEnabled()) {
-            subscribe(LASTIP_CHANNEL, (lines) -> {
-                log(4, "Received last ip update: " + Arrays.toString(lines));
+            subscribe(LASTIP_CHANNEL).consume((channel, lines) -> {
+                opguard.log(4, "Received last ip update: " + Arrays.toString(lines));
                 opguard.verifier().updateLastIp(UUID.fromString(lines[0]), lines[1]);
             });
-            start();
+            final Broker broker = loadBroker();
+            broker.setLogger(LogFilter.valueOf(opguard.logger(), () -> opguard.config().getLogLevel()));
+            start(broker);
         }
     }
 
@@ -66,42 +47,20 @@ public class OpGuardDelivery extends AbstractMessenger {
     }
 
     @Override
-    protected @NotNull DeliveryClient loadDeliveryClient() {
+    protected @NotNull Broker loadBroker() {
         switch (opguard.config().getMessengerType().toUpperCase()) {
             case "REDIS":
-                return RedisDelivery.of(opguard.config().getRedisUrl());
+                return new RedisBroker(RedisClient.create(opguard.config().getRedisUrl()));
             case "SQL":
-                return HikariDelivery.of(
+                final HikariBroker broker = HikariBroker.of(
                         opguard.config().getSqlUrl(),
                         opguard.config().getSqlUsername(),
-                        opguard.config().getSqlPassword(),
-                        opguard.config().getSqlTablePrefix()
+                        opguard.config().getSqlPassword()
                 );
+                broker.setTablePrefix(opguard.config().getSqlTablePrefix());
+                return broker;
             default:
                 throw new IllegalStateException("The messenger type '" + opguard.config().getMessengerType() + "' doesn't exists");
         }
-    }
-
-    @Override
-    public void log(int level, @NotNull Throwable t) {
-        opguard.log(level, t);
-    }
-
-    @Override
-    public void log(int level, @NotNull String msg) {
-        opguard.log(level, msg);
-    }
-
-    @Override
-    public @NotNull Runnable async(@NotNull Runnable runnable) {
-        final BukkitTask task = Bukkit.getScheduler().runTaskAsynchronously(opguard.plugin(), runnable);
-        return task::cancel;
-    }
-
-    @Override
-    public @NotNull Runnable asyncRepeating(@NotNull Runnable runnable, long time, @NotNull TimeUnit unit) {
-        final long ticks = unit.toMillis(time) / 50;
-        final BukkitTask task = Bukkit.getScheduler().runTaskTimerAsynchronously(opguard.plugin(), runnable, ticks, ticks);
-        return task::cancel;
     }
 }

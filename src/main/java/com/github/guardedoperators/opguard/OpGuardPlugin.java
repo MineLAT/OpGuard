@@ -28,18 +28,29 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-@Dependencies({
-        @Dependency(value = "com.saicone.settings:settings-yaml:14d88b0f12", relocate = {
-                "com.saicone.settings", "{package}.libs.settings",
-                "org.yaml.snakeyaml", "{package}.libs.snakeyaml"
-        }),
-        @Dependency(value = "at.favre.lib:bcrypt:0.9.0", relocate = {
-                "at.favre.lib.crypto.bcrypt", "{package}.libs.bcrypt",
-                "at.favre.lib.bytes", "{package}.libs.bytes"
-        }),
-        @Dependency(value = "com.github.zafarkhaja:java-semver:0.9.0", relocate = {
-                "com.github.zafarkhaja.semver", "{package}.libs.semver"
-        })
+@Dependencies(value = {
+        @Dependency("com.saicone.settings:settings:1.0.5"),
+        @Dependency("com.saicone.settings:settings-yaml:1.0.5"),
+        @Dependency("com.saicone.delivery4j:delivery4j:1.1.5"),
+        @Dependency("com.saicone.delivery4j:broker-sql-hikari:1.1.5"),
+        @Dependency("com.saicone.delivery4j:broker-redis:1.1.5"),
+        @Dependency("org.slf4j:slf4j-nop:1.7.36"),
+        @Dependency("at.favre.lib:bcrypt:0.9.0"),
+        @Dependency("com.github.zafarkhaja:java-semver:0.9.0")
+}, relocations = {
+        "com.saicone.settings", "{package}.libs.settings",
+        "com.saicone.types", "{package}.libs.types",
+        "org.yaml.snakeyaml", "{package}.libs.snakeyaml",
+        "com.saicone.delivery4j", "{package}.libs.delivery4j",
+        "com.zaxxer.hikari", "{package}.libs.hikari",
+        "redis.clients.jedis", "{package}.libs.jedis",
+        "com.google.gson", "{package}.libs.gson",
+        "org.apache.commons.pool2", "{package}.libs.commons.pool2",
+        "org.json", "{package}.libs.json",
+        "org.slf4j", "{package}.libs.slf4j",
+        "at.favre.lib.crypto.bcrypt", "{package}.libs.bcrypt",
+        "at.favre.lib.bytes", "{package}.libs.bytes",
+        "com.github.zafarkhaja.semver", "{package}.libs.semver",
 })
 public final class OpGuardPlugin extends JavaPlugin implements Listener {
     // https://bstats.org/plugin/bukkit/OpGuard/540
@@ -51,9 +62,6 @@ public final class OpGuardPlugin extends JavaPlugin implements Listener {
         new EzlibLoader().logger((level, msg) -> {
             switch (level) {
                 case 1:
-                    if (msg.contains("insecure protocol")) {
-                        break;
-                    }
                     getLogger().severe(msg);
                     break;
                 case 2:

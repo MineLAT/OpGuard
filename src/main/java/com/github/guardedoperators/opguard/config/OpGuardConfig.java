@@ -20,9 +20,8 @@ package com.github.guardedoperators.opguard.config;
 import com.github.guardedoperators.opguard.OpGuard;
 import com.saicone.settings.Settings;
 import com.saicone.settings.SettingsData;
-import com.saicone.settings.SettingsLoader;
 import com.saicone.settings.data.DataType;
-import com.saicone.settings.source.YamlSettingsSource;
+import com.saicone.types.Types;
 
 import java.util.List;
 
@@ -32,9 +31,8 @@ public final class OpGuardConfig {
     private List<String> toggleExecution = List.of();
 
     public OpGuardConfig(OpGuard plugin) {
-        data.parentFolder(plugin.plugin().getDataFolder()).source(new YamlSettingsSource());
-        SettingsLoader.simple().load(data);
-        toggleExecution = yaml().get("toggle-execution").asStringList();
+        data.load(plugin.plugin().getDataFolder());
+        toggleExecution = yaml().get("toggle-execution").asList(Types.STRING);
     }
 
     private Settings yaml() {
@@ -42,8 +40,8 @@ public final class OpGuardConfig {
     }
 
     public void reload() {
-        SettingsLoader.simple().load(data);
-        toggleExecution = yaml().get("toggle-execution").asStringList();
+        data.load();
+        toggleExecution = yaml().get("toggle-execution").asList(Types.STRING);
     }
 
     public boolean isLocked() {
@@ -79,27 +77,27 @@ public final class OpGuardConfig {
     }
 
     public List<String> toggleCommandsOp() {
-        return yaml().get("toggle-commands", "op").asStringList();
+        return yaml().get("toggle-commands", "op").asList(Types.STRING);
     }
 
     public List<String> toggleCommandsDeop() {
-        return yaml().get("toggle-commands", "deop").asStringList();
+        return yaml().get("toggle-commands", "deop").asList(Types.STRING);
     }
 
     public List<String> toggleCommandsFail() {
-        return yaml().get("toggle-commands", "fail").asStringList();
+        return yaml().get("toggle-commands", "fail").asList(Types.STRING);
     }
 
     public List<String> verifyCommandsOp() {
-        return yaml().get("verify-commands", "op").asStringList();
+        return yaml().get("verify-commands", "op").asList(Types.STRING);
     }
 
     public List<String> verifyCommandsDeop() {
-        return yaml().get("verify-commands", "deop").asStringList();
+        return yaml().get("verify-commands", "deop").asList(Types.STRING);
     }
 
     public List<String> verifyCommandsFail() {
-        return yaml().get("verify-commands", "fail").asStringList();
+        return yaml().get("verify-commands", "fail").asList(Types.STRING);
     }
 
     public boolean canShutDownOnDisable() {
@@ -161,7 +159,7 @@ public final class OpGuardConfig {
     }
 
     public List<String> getExemptPlugins() {
-        return yaml().get("exempt-plugins").asStringList();
+        return yaml().get("exempt-plugins").asList(Types.STRING);
     }
 
     // Logging
@@ -243,7 +241,7 @@ public final class OpGuardConfig {
     }
 
     public List<String> getPunishmentCommands() {
-        return yaml().get("punishment-commands").asStringList();
+        return yaml().get("punishment-commands").asList(Types.STRING);
     }
 
     // Update Checks
